@@ -37,11 +37,11 @@ git submodule update --init --recursive
   # 确保输出为CMake version 3.31.5
   ```
 
-  确保Python和CMake的版本正确后，将以下命令中的`path/to/Framework3D`替换为你的实验框架目录，然后执行：
+  确保Python和CMake的版本正确后，将以下命令中的`path/to/DGP_2025`替换为你的实验框架目录，然后执行：
 
   ```shell
   # 移动到实验框架目录
-  cd path/to/Framework3D
+  cd path/to/DGP_2025
   # 构建Debug模式依赖，你也可以将以下命令修改为python configure.py --all --build_variant Debug Release RelWithDebInfo，以构建全部模式依赖
   python configure.py --all --build_variant Debug
   ```
@@ -51,7 +51,7 @@ git submodule update --init --recursive
 - 如果你在使用Windows，可以直接下载提供的依赖库：https://rec.ustc.edu.cn/share/cba194a0-f2c5-11ef-aea0-e31b2c680248 ，将其解压到当前文件夹，形如
 
   ```
-  Framework3D
+  DGP_2025
   ├── SDK
   │   ├── OpenUSD
   │   └── slang
