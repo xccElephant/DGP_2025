@@ -39,6 +39,11 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
         return input_pick_triggered;
     }
 
+    static std::vector<std::pair<polyscope::Structure*, size_t>> GetPickResult()
+    {
+        return pick_result;
+    }
+
    protected:
     ImGuiWindowFlags GetWindowFlag() override;
     const char* GetWindowName() override;
@@ -67,13 +72,7 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     void DrawMenuBar();
     void DrawFrame();
 
-    // [0]: left mouse button, [1]: ctrl + left mouse button, [2]: middle mouse
-    // button
-    std::vector<std::pair<polyscope::Structure*, size_t>> pick_result = {
-        { nullptr, 0 },
-        { nullptr, 0 },
-        { nullptr, 0 }
-    };
+    static std::vector<std::pair<polyscope::Structure*, size_t>> pick_result;
     polyscope::Structure* curr_visualization_structure = nullptr;
 
     void VisualizePickVertexGizmo(

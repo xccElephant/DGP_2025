@@ -48,9 +48,10 @@ int main()
         auto polyscope_render = static_cast<PolyscopeRenderer*>(
             window->get_widget("Polyscope Renderer"));
         if (polyscope_render) {
-            bool input_transform_triggered =
-                polyscope_render->GetInputTransformTriggered();
-            if (input_transform_triggered) {
+            bool input_triggered =
+                polyscope_render->GetInputTransformTriggered() ||
+                polyscope_render->GetInputPickTriggered();
+            if (input_triggered) {
                 window->set_all_node_system_dirty();
             }
         }

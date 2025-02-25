@@ -87,20 +87,20 @@ NODE_EXECUTION_FUNCTION(write_polyscope)
 
         polyscope::SurfaceMesh* surface_mesh = nullptr;
 
-        if (!polyscope::hasStructure("Surface Mesh", sdf_path.GetName())) {
+        if (!polyscope::hasStructure("Surface Mesh", sdf_path.GetString())) {
             surface_mesh = polyscope::registerSurfaceMesh(
-                sdf_path.GetName(), vertices, faceVertexIndicesNested);
+                sdf_path.GetString(), vertices, faceVertexIndicesNested);
         }
         else {
             surface_mesh = dynamic_cast<polyscope::SurfaceMesh*>(
-                polyscope::getStructure("Surface Mesh", sdf_path.GetName()));
+                polyscope::getStructure("Surface Mesh", sdf_path.GetString()));
             if (surface_mesh->nVertices() == vertices.size() &&
                 surface_mesh->nFaces() == faceVertexCounts.size()) {
                 surface_mesh->updateVertexPositions(vertices);
             }
             else {
                 surface_mesh = polyscope::registerSurfaceMesh(
-                    sdf_path.GetName(), vertices, faceVertexIndicesNested);
+                    sdf_path.GetString(), vertices, faceVertexIndicesNested);
             }
         }
 
@@ -246,19 +246,19 @@ NODE_EXECUTION_FUNCTION(write_polyscope)
 
         polyscope::PointCloud* point_cloud = nullptr;
 
-        if (!polyscope::hasStructure("Point Cloud", sdf_path.GetName())) {
+        if (!polyscope::hasStructure("Point Cloud", sdf_path.GetString())) {
             point_cloud =
-                polyscope::registerPointCloud(sdf_path.GetName(), vertices);
+                polyscope::registerPointCloud(sdf_path.GetString(), vertices);
         }
         else {
             point_cloud = dynamic_cast<polyscope::PointCloud*>(
-                polyscope::getStructure("Point Cloud", sdf_path.GetName()));
+                polyscope::getStructure("Point Cloud", sdf_path.GetString()));
             if (point_cloud->nPoints() == vertices.size()) {
                 point_cloud->updatePointPositions(vertices);
             }
             else {
-                point_cloud =
-                    polyscope::registerPointCloud(sdf_path.GetName(), vertices);
+                point_cloud = polyscope::registerPointCloud(
+                    sdf_path.GetString(), vertices);
             }
         }
 
@@ -304,20 +304,20 @@ NODE_EXECUTION_FUNCTION(write_polyscope)
 
         polyscope::CurveNetwork* curve_network = nullptr;
 
-        if (!polyscope::hasStructure("Curve Network", sdf_path.GetName())) {
+        if (!polyscope::hasStructure("Curve Network", sdf_path.GetString())) {
             curve_network = polyscope::registerCurveNetwork(
-                sdf_path.GetName(), vertices, edges);
+                sdf_path.GetString(), vertices, edges);
         }
         else {
             curve_network = dynamic_cast<polyscope::CurveNetwork*>(
-                polyscope::getStructure("Curve Network", sdf_path.GetName()));
+                polyscope::getStructure("Curve Network", sdf_path.GetString()));
             if (curve_network->nNodes() == vertices.size() &&
                 curve_network->nEdges() == edges.size()) {
                 curve_network->updateNodePositions(vertices);
             }
             else {
                 curve_network = polyscope::registerCurveNetwork(
-                    sdf_path.GetName(), vertices, edges);
+                    sdf_path.GetString(), vertices, edges);
             }
         }
 

@@ -38,6 +38,9 @@ git submodule update --init --recursive
    
    cmake --version
    # 确保输出为CMake version 3.31.5
+
+   echo $Env:VULKAN_SDK
+   # 确保输出为Vulkan SDK的路径
    ```
  
    确保Python和CMake的版本正确后，将以下命令中的`path/to/DGP_2025`替换为你的实验框架目录，然后执行：

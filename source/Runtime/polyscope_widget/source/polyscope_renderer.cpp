@@ -25,6 +25,13 @@
 
 USTC_CG_NAMESPACE_OPEN_SCOPE
 
+// [0]: left Ctrl + left mouse button, [1]: left mouse button, [2]: middle mouse
+// button
+std::vector<std::pair<polyscope::Structure*, size_t>>
+    PolyscopeRenderer::pick_result = { { nullptr, 0 },
+                                       { nullptr, 0 },
+                                       { nullptr, 0 } };
+
 // int nPts = 2000;
 // float anotherParam = 0.0;
 
@@ -478,8 +485,10 @@ void PolyscopeRenderer::ProcessInputEvents()
             }
 
             // Click picks
+
+            // Left Ctrl + left click picks
             float dragIgnoreThreshold = 0.01;
-            if (ImGui::IsMouseReleased(0)) {
+            if (io.KeyCtrl && ImGui::IsMouseReleased(0)) {
                 // Don't pick at the end of a long drag
                 if (drag_distSince_last_release < dragIgnoreThreshold) {
                     // ImVec2 p = ImGui::GetMousePos();
@@ -487,14 +496,18 @@ void PolyscopeRenderer::ProcessInputEvents()
                     std::pair<polyscope::Structure*, size_t> pickResult =
                         polyscope::pick::pickAtScreenCoords(
                             glm::vec2{ p.x, p.y });
-                    polyscope::pick::setSelection(pickResult);
+                    if (pickResult.first != pick_result[0].first ||
+                        pickResult.second != pick_result[0].second) {
+                        input_pick_triggered = true;
+                    }
                     pick_result[0] = pickResult;
                 }
 
                 // Reset the drag distance after any release
                 drag_distSince_last_release = 0.0;
             }
-            if (ImGui::IsMouseReleased(2)) {
+            // Left click picks
+            else if (ImGui::IsMouseReleased(0)) {
                 // Don't pick at the end of a long drag
                 if (drag_distSince_last_release < dragIgnoreThreshold) {
                     // ImVec2 p = ImGui::GetMousePos();
@@ -502,6 +515,29 @@ void PolyscopeRenderer::ProcessInputEvents()
                     std::pair<polyscope::Structure*, size_t> pickResult =
                         polyscope::pick::pickAtScreenCoords(
                             glm::vec2{ p.x, p.y });
+                    if (pickResult.first != pick_result[1].first ||
+                        pickResult.second != pick_result[1].second) {
+                        input_pick_triggered = true;
+                    }
+                    polyscope::pick::setSelection(pickResult);
+                    pick_result[1] = pickResult;
+                }
+
+                // Reset the drag distance after any release
+                drag_distSince_last_release = 0.0;
+            }
+            else if (ImGui::IsMouseReleased(2)) {
+                // Don't pick at the end of a long drag
+                if (drag_distSince_last_release < dragIgnoreThreshold) {
+                    // ImVec2 p = ImGui::GetMousePos();
+                    ImVec2 p = ImGui::GetMousePos() - window->Pos;
+                    std::pair<polyscope::Structure*, size_t> pickResult =
+                        polyscope::pick::pickAtScreenCoords(
+                            glm::vec2{ p.x, p.y });
+                    if (pickResult.first != pick_result[2].first ||
+                        pickResult.second != pick_result[2].second) {
+                        input_pick_triggered = true;
+                    }
                     pick_result[2] = pickResult;
                     VisualizePickVertexGizmo(pickResult);
                 }
@@ -513,6 +549,8 @@ void PolyscopeRenderer::ProcessInputEvents()
             if (ImGui::IsMouseReleased(1)) {
                 if (drag_distSince_last_release < dragIgnoreThreshold) {
                     polyscope::pick::resetSelection();
+                    pick_result[0] = { nullptr, 0 };
+                    pick_result[1] = { nullptr, 0 };
                     pick_result[2] = { nullptr, 0 };
                     if (curr_visualization_structure != nullptr) {
                         curr_visualization_structure->remove();
