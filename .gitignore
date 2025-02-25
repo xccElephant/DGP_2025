@@ -1,0 +1,16 @@
+SDK/
+Binaries/
+build/
+.vs/
+.vscode/
+out/
+CMakeSettings.json
+.VSCodeCounter/
+SDK.zip
+*.user
+.cache/
+*.exr
+__pycache__/
+.pytest_cache/
+.slangtorch_cache/
+Assets/
