@@ -20,6 +20,11 @@ git submodule update --init --recursive
 
 安装时无需勾选Debug库，需要加入path。
 
+#### python依赖
+PyOpenGL PySide6 numpy
+
+推荐使用pip安装。
+
 ### CMake 最新版本 (>3.31.5)
 [下载地址](https://cmake.org/download/#latest)
 
@@ -73,11 +78,6 @@ git submodule update --init --recursive
    ```
 
 最后用编辑器/IDE打开文件夹，或cmake后打开sln文件即配置完成
-
-### 可选
-python依赖：PyOpenGL PySide6 numpy
-
-推荐使用pip安装。
 
 ## 使用方法简介
 打开项目并编译后，运行`USTC_CG_polyscope_test`项目（可执行文件位于`Binaries`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
