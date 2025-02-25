@@ -131,9 +131,13 @@ def process_usd(targets, dry_run=False, keep_original_files=True, copy_only=Fals
             vulkan_support = ""
             if "VULKAN_SDK" in os.environ:
                 vulkan_support = "-DPXR_ENABLE_VULKAN_SUPPORT=ON"
-            else:
+            elif not copy_only:
                 print(
                     "Warning: VULKAN_SDK is not in the path. Highly recommend setting it for Vulkan support."
+                )
+            else:
+                print(
+                    "Error: VULKAN_SDK is not in the path. Please set it for Vulkan support before building."
                 )
 
             build_variant_map = {
@@ -191,6 +195,8 @@ def pack_sdk(dry_run=False):
     python_dir_forward_slash = python_dir_backward_slash.replace("\\", "/")
     framework3d_dir_backward_slash = os.getcwd().replace("/", "\\")
     framework3d_dir_forward_slash = framework3d_dir_backward_slash.replace("\\", "/")
+    vulkan_sdk_dir_backward_slash = os.environ.get("VULKAN_SDK", "").replace("/", "\\")
+    vulkan_sdk_dir_forward_slash = vulkan_sdk_dir_backward_slash.replace("\\", "/")
 
     def copy_file(src_file, dst_file):
         if dry_run:
@@ -207,6 +213,8 @@ def pack_sdk(dry_run=False):
             filedata = filedata.replace(python_dir_forward_slash, "{PYTHON_DIR_FORWARD_SLASH}")
             filedata = filedata.replace(framework3d_dir_backward_slash, "{FRAMEWORK3D_DIR_BACKWARD_SLASH}")
             filedata = filedata.replace(framework3d_dir_forward_slash, "{FRAMEWORK3D_DIR_FORWARD_SLASH}")
+            filedata = filedata.replace(vulkan_sdk_dir_backward_slash, "{VULKAN_SDK_DIR_BACKWARD_SLASH}")
+            filedata = filedata.replace(vulkan_sdk_dir_forward_slash, "{VULKAN_SDK_DIR_FORWARD_SLASH}")
             if filedata != filedata_0:
                 with open(dst_file, "w", encoding="utf-8") as file:
                     file.write(filedata)
@@ -349,6 +357,8 @@ def main():
         python_dir_forward_slash = python_dir_backward_slash.replace("\\", "/")
         framework3d_dir_backward_slash = os.getcwd().replace("/", "\\")
         framework3d_dir_forward_slash = framework3d_dir_backward_slash.replace("\\", "/")
+        vulkan_sdk_dir_backward_slash = os.environ.get("VULKAN_SDK", "").replace("/", "\\")
+        vulkan_sdk_dir_forward_slash = vulkan_sdk_dir_backward_slash.replace("\\", "/")
 
         # 创建替换映射
         replacements = {
@@ -356,6 +366,8 @@ def main():
             "{PYTHON_DIR_FORWARD_SLASH}": python_dir_forward_slash,
             "{FRAMEWORK3D_DIR_BACKWARD_SLASH}": framework3d_dir_backward_slash,
             "{FRAMEWORK3D_DIR_FORWARD_SLASH}": framework3d_dir_forward_slash,
+            "{VULKAN_SDK_DIR_BACKWARD_SLASH}": vulkan_sdk_dir_backward_slash,
+            "{VULKAN_SDK_DIR_FORWARD_SLASH}": vulkan_sdk_dir_forward_slash,
         }
 
         # 使用线程池处理文件

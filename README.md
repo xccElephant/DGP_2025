@@ -23,48 +23,51 @@ git submodule update --init --recursive
 ### CMake 最新版本 (>3.31.5)
 [下载地址](https://cmake.org/download/#latest)
 
+### Vulkan SDK (方法2必须)
+[下载地址](https://vulkan.lunarg.com/sdk/home)
+
 ### 其他依赖
 
 本框架依赖于OpenUSD和slang，你有两种方式来构建依赖
 
-- 打开终端。如果你在使用Windows，打开VS附带的**Developer PowerShell for VS 2022**，以确保默认使用的编译器是MSVC。在开始构建前，你需要确保已安装最新版的CMake(>3.31.5)和Python3.10.11，并将其加入环境变量。输入以下命令以测试：
+1. 打开终端。如果你在使用Windows，打开VS附带的**Developer PowerShell for VS 2022**，以确保默认使用的编译器是MSVC。在开始构建前，你需要确保已安装最新版的CMake(>3.31.5)和Python3.10.11，并将其加入环境变量。输入以下命令以测试：
 
-  ```shell
-  python --version
-  # 确保输出为Python 3.10.11
+   ```shell
+   python --version
+   # 确保输出为Python 3.10.11
+   
+   cmake --version
+   # 确保输出为CMake version 3.31.5
+   ```
+ 
+   确保Python和CMake的版本正确后，将以下命令中的`path/to/DGP_2025`替换为你的实验框架目录，然后执行：
 
-  cmake --version
-  # 确保输出为CMake version 3.31.5
-  ```
+   ```shell
+   # 移动到实验框架目录
+   cd path/to/DGP_2025
+   # 构建Debug模式依赖，你也可以将以下命令修改为python configure.py --all --build_variant Debug Release RelWithDebInfo，以构建全部模式依赖
+   python configure.py --all --build_variant Debug
+   ```
 
-  确保Python和CMake的版本正确后，将以下命令中的`path/to/DGP_2025`替换为你的实验框架目录，然后执行：
+   以上的方法对网络要求较高，且耗时较长。构建完成后会占据很大的空间，可以删除`SDK/OpenUSD/Debug/build/`和`SDK/OpenUSD/Debug/src`文件夹以释放部分空间。
 
-  ```shell
-  # 移动到实验框架目录
-  cd path/to/DGP_2025
-  # 构建Debug模式依赖，你也可以将以下命令修改为python configure.py --all --build_variant Debug Release RelWithDebInfo，以构建全部模式依赖
-  python configure.py --all --build_variant Debug
-  ```
+2. 如果你在使用Windows，可以直接下载提供的依赖库：https://rec.ustc.edu.cn/share/964f44c0-f347-11ef-a987-91f9b7ea5492 ，将其解压到当前文件夹，形如
 
-  以上的方法对网络要求较高，且耗时较长。构建完成后会占据很大的空间，可以删除`SDK/OpenUSD/Debug/build/`和`SDK/OpenUSD/Debug/src`文件夹以释放部分空间。
+   ```
+   DGP_2025
+   ├── SDK
+   │   ├── OpenUSD
+   │   └── slang
+   └── ...
+   ```
 
-- 如果你在使用Windows，可以直接下载提供的依赖库：https://rec.ustc.edu.cn/share/cba194a0-f2c5-11ef-aea0-e31b2c680248 ，将其解压到当前文件夹，形如
+   然后打开终端，执行以下命令
 
-  ```
-  DGP_2025
-  ├── SDK
-  │   ├── OpenUSD
-  │   └── slang
-  └── ...
-  ```
-  
-  然后打开终端，执行以下命令
-  
-  ```shell
-  # 构建所有模式的依赖
-  # 注意：运行后SDK文件夹内的内容将被修改，如需重新构建，请删除SDK、Binary文件夹，重新解压SDK.zip
-  python configure.py --all --copy-only --build_variant Debug Release RelWithDebInfo
-  ```
+   ```shell
+   # 构建所有模式的依赖
+   # 注意：运行后SDK文件夹内的内容将被修改，如需重新构建，请删除SDK、Binary文件夹，重新解压SDK.zip
+   python configure.py --all --copy-only --build_variant Debug Release RelWithDebInfo
+   ```
 
 最后用编辑器/IDE打开文件夹，或cmake后打开sln文件即配置完成
 
