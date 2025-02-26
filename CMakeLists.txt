@@ -53,6 +53,7 @@ set(BUILD_SHARED_LIBS ON)
 
 # On mac, the cpp standard should >= 20
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fms-extensions")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
