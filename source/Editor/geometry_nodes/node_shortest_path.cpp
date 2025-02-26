@@ -1,11 +1,9 @@
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
-#include <queue>
+#include <cstddef>
 #include <string>
 
 #include "GCore/Components/MeshOperand.h"
 #include "GCore/GOP.h"
-#include "GCore/geom_payload.hpp"
-#include "geom_node_base.h"
 #include "nodes/core/def/node_def.hpp"
 
 // Return true if the shortest path exists, and fill in the shortest path
@@ -14,7 +12,7 @@ bool find_shortest_path(
     const OpenMesh::PolyMesh_ArrayKernelT<>::VertexHandle& start_vertex_handle,
     const OpenMesh::PolyMesh_ArrayKernelT<>::VertexHandle& end_vertex_handle,
     const OpenMesh::PolyMesh_ArrayKernelT<>& omesh,
-    std::list<unsigned long long>& shortest_path_vertex_indices,
+    std::list<size_t>& shortest_path_vertex_indices,
     float& distance)
 {
     // TODO: Implement the shortest path algorithm
@@ -30,10 +28,10 @@ NODE_DECLARATION_FUNCTION(shortest_path)
     b.add_input<std::string>("Picked Mesh [0] Name");
     b.add_input<std::string>("Picked Mesh [1] Name");
     b.add_input<Geometry>("Picked Mesh");
-    b.add_input<unsigned long long>("Picked Vertex [0] Index");
-    b.add_input<unsigned long long>("Picked Vertex [1] Index");
+    b.add_input<size_t>("Picked Vertex [0] Index");
+    b.add_input<size_t>("Picked Vertex [1] Index");
 
-    b.add_output<std::list<unsigned long long>>("Shortest Path Vertex Indices");
+    b.add_output<std::list<size_t>>("Shortest Path Vertex Indices");
     b.add_output<float>("Shortest Path Distance");
 }
 
@@ -77,9 +75,8 @@ NODE_EXECUTION_FUNCTION(shortest_path)
     }
 
     auto start_vertex_index =
-        params.get_input<unsigned long long>("Picked Vertex [0] Index");
-    auto end_vertex_index =
-        params.get_input<unsigned long long>("Picked Vertex [1] Index");
+        params.get_input<size_t>("Picked Vertex [0] Index");
+    auto end_vertex_index = params.get_input<size_t>("Picked Vertex [1] Index");
 
     // Turn the vertex indices into OpenMesh vertex handles
     OpenMesh::VertexHandle start_vertex_handle(start_vertex_index);
@@ -87,21 +84,28 @@ NODE_EXECUTION_FUNCTION(shortest_path)
 
     // The indices of the vertices on the shortest path, including the start and
     // end vertices
-    std::list<unsigned long long> shortest_path_vertex_indices;
+    std::list<size_t> shortest_path_vertex_indices;
 
     // The distance of the shortest path
     float distance = 0.0f;
 
-    find_shortest_path(
-        start_vertex_handle,
-        end_vertex_handle,
-        omesh,
-        shortest_path_vertex_indices,
-        distance);
+    if (find_shortest_path(
+            start_vertex_handle,
+            end_vertex_handle,
+            omesh,
+            shortest_path_vertex_indices,
+            distance)) {
+        params.set_output(
+            "Shortest Path Vertex Indices", shortest_path_vertex_indices);
+        params.set_output("Shortest Path Distance", distance);
+        return true;
+    }
+    else {
+        params.set_output("Shortest Path Vertex Indices", std::list<size_t>());
+        params.set_output("Shortest Path Distance", 0.0f);
+        return false;
+    }
 
-    params.set_output(
-        "Shortest Path Vertex Indices", shortest_path_vertex_indices);
-    params.set_output("Shortest Path Distance", distance);
     return true;
 }
 

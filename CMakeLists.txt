@@ -53,7 +53,10 @@ set(BUILD_SHARED_LIBS ON)
 
 # On mac, the cpp standard should >= 20
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fms-extensions")
+
+if(NOT "MSVC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fms-extensions")
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -99,7 +102,6 @@ if(pxr_FOUND)
   set(USTC_CG_WITH_OPENUSD ON)
 
   if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-
     if(Python3_LIBRARY MATCHES "_d.lib$")
       set_target_properties(usd PROPERTIES INTERFACE_COMPILE_DEFINITIONS "TBB_USE_DEBUG=1; BOOST_DEBUG_PYTHON")
     else()
