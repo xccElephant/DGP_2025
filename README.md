@@ -28,7 +28,7 @@ PyOpenGL PySide6 numpy
 ### CMake 最新版本 (>3.31.5)
 [下载地址](https://cmake.org/download/#latest)
 
-### Vulkan SDK (方法2必须)
+### Vulkan SDK (为避免兼容性问题，使用1.3.296版本) (**方法2必须**)
 [下载地址](https://vulkan.lunarg.com/sdk/home)
 
 ### 其他依赖
