@@ -6,4 +6,5 @@
 
 ## 作业索引
 
-- [作业一](./assignment1/README.md)：最短路径计算
+- [作业一](./assignment1/README.md)：最短路径计算  
+  Deadline: 23:59, 2025-03-09
