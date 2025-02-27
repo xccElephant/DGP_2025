@@ -4,14 +4,17 @@
 
 #include "GCore/Components/MeshOperand.h"
 #include "GCore/GOP.h"
+#include "OpenMesh/Core/Mesh/PolyConnectivity.hh"
 #include "nodes/core/def/node_def.hpp"
+
+typedef OpenMesh::PolyMesh_ArrayKernelT<> MyMesh;
 
 // Return true if the shortest path exists, and fill in the shortest path
 // vertices and the distance. Otherwise, return false.
 bool find_shortest_path(
-    const OpenMesh::PolyMesh_ArrayKernelT<>::VertexHandle& start_vertex_handle,
-    const OpenMesh::PolyMesh_ArrayKernelT<>::VertexHandle& end_vertex_handle,
-    const OpenMesh::PolyMesh_ArrayKernelT<>& omesh,
+    const MyMesh::VertexHandle& start_vertex_handle,
+    const MyMesh::VertexHandle& end_vertex_handle,
+    const MyMesh& omesh,
     std::list<size_t>& shortest_path_vertex_indices,
     float& distance)
 {
@@ -55,7 +58,7 @@ NODE_EXECUTION_FUNCTION(shortest_path)
     auto face_vertex_indices = mesh->get_face_vertex_indices();
 
     // Convert the mesh to OpenMesh
-    OpenMesh::PolyMesh_ArrayKernelT<> omesh;
+    MyMesh omesh;
     // Add vertices
     std::vector<OpenMesh::VertexHandle> vhandles;
     for (size_t i = 0; i < vertices.size(); i++) {
