@@ -325,7 +325,7 @@ NODE_EXECUTION_FUNCTION(write_polyscope)
     }
 
     if (!structure) {
-        std::exception("No geometry found");
+        polyscope::exception("No geometry found");
         return false;
     }
 

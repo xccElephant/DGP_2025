@@ -335,6 +335,10 @@ def main():
         urls = {
             "slang": "https://github.com/shader-slang/slang/releases/download/v2024.15.2/slang-2024.15.2-windows-x86_64.zip",
         }
+    elif os.name == "posix":
+        urls = {
+            "slang": "https://github.com/shader-slang/slang/releases/download/v2024.15.2/slang-2024.15.2-macos-x86_64.zip",
+    }
     else:
         urls = {
             "slang": "https://github.com/shader-slang/slang/releases/download/v2024.14.5/slang-2024.14.5-linux-x86_64.zip",
