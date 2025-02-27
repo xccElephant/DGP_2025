@@ -1,6 +1,8 @@
 # DGP_2025
 The assignments for the Digital Geometry Processing course for 2025, Spring.
 
+# 作业目录 [点击跳转->](./assignments/README.md)
+
 # Build
 首先执行git系列操作
 ```

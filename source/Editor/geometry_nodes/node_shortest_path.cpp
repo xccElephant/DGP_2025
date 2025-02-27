@@ -1,13 +1,12 @@
-#include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
+#include <OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh>
 #include <cstddef>
 #include <string>
 
 #include "GCore/Components/MeshOperand.h"
 #include "GCore/GOP.h"
-#include "OpenMesh/Core/Mesh/PolyConnectivity.hh"
 #include "nodes/core/def/node_def.hpp"
 
-typedef OpenMesh::PolyMesh_ArrayKernelT<> MyMesh;
+typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
 
 // Return true if the shortest path exists, and fill in the shortest path
 // vertices and the distance. Otherwise, return false.
