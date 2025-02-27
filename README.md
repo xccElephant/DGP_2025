@@ -27,6 +27,10 @@ PyOpenGL PySide6 numpy
 
 推荐使用pip安装。
 
+```
+pip install PyOpenGL PySide6 numpy
+```
+
 ### CMake 最新版本 (>3.31.5)
 [下载地址](https://cmake.org/download/#latest)
 
@@ -84,12 +88,16 @@ PyOpenGL PySide6 numpy
 ## Mac (macOS Catalina) + Homebrew + Xcode
 App Store 下载Xcode安装
 运行命令
+```Terminal
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer 
+```
 
 ### Python 3.10.11 
+```Terminal
 brew install pyenv
 pyenv install 3.10.11
 pyenv global 3.10.11   # 全局设置为3.10.11版本
+```
 
 Terminal 设置
 ```Terminal
@@ -100,10 +108,14 @@ source ~/.zshrc  # 或 source ~/.bash_profile
 
 ### CMake 最新版本 (>=3.31.5)
 [下载地址](https://cmake.org/download/#latest)
+```Terminal
 brew install cmake
+```
 
 ### ninja 安装
+```Terminal
 brew install ninja
+```
 
 ### vulkan 安装 (为避免兼容性问题，使用1.3.296版本)
 [下载地址](https://vulkan.lunarg.com/sdk/home)
@@ -111,9 +123,11 @@ brew install ninja
 确保Python和CMake的版本正确
 python --version
 # 确保输出为Python 3.10.11
+```
 pip install pyside6 pyopengl jinja2 -i https://pypi.mirrors.ustc.edu.cn/simple/    # 必须安装
 cmake --version
 # 确保输出为CMake version>=3.31.5
+```
 
 将以下命令中的`path/to/DGP_2025`替换为你的实验框架目录，然后执行：
 ```Terminal
