@@ -6,8 +6,8 @@ The assignments for the Digital Geometry Processing course for 2025, Spring.
 # Build
 首先执行git系列操作
 ```
-git fetch upstream
-git merge upstream/main
+git clone https://github.com/T7imal/DGP_2025.git
+cd DGP_2025
 git submodule update --init --recursive
 ```
 然后安装下方依赖。
