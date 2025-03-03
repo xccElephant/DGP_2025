@@ -3,6 +3,8 @@ The assignments for the Digital Geometry Processing course for 2025, Spring.
 
 # 作业目录 [点击跳转->](./assignments/README.md)
 
+# 常见问题 [点击跳转->](./doc/FAQ.md)
+
 # Build
 首先执行git系列操作
 ```
@@ -139,7 +141,7 @@ python configure.py --all --build_variant Debug
 在构建依赖过程中python可能会缺少一些安装包，通过 pip install ... 安装后再次构建依赖即可
 
 ## 使用方法简介
-打开项目并编译后，运行`USTC_CG_polyscope_test`项目（可执行文件位于`Binaries`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
+打开项目并编译后，运行`USTC_CG_polyscope_test`项目（可执行文件位于`Binaries/Debug`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
 
 ![image-1](images/image_1.png)
 
