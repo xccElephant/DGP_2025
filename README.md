@@ -4,13 +4,15 @@ The assignments for the Digital Geometry Processing course for 2025, Spring.
 
 # 作业目录 [点击跳转&gt;](./assignments/README.md)
 
+# 常见问题 [点击跳转->](./doc/FAQ.md)
+
 # Build
 
 首先执行git系列操作
 
 ```
-git fetch upstream
-git merge upstream/main
+git clone https://github.com/T7imal/DGP_2025.git
+cd DGP_2025
 git submodule update --init --recursive
 ```
 
@@ -157,8 +159,7 @@ python configure.py --all --build_variant Debug
 在构建依赖过程中python可能会缺少一些安装包，通过 pip install ... 安装后再次构建依赖即可
 
 ## 使用方法简介
-
-打开项目并编译后，运行 `USTC_CG_polyscope_test`项目（可执行文件位于 `Binaries`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
+打开项目并编译后，运行`USTC_CG_polyscope_test`项目（可执行文件位于`Binaries/Debug`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
 
 ![image-1](images/image_1.png)
 
@@ -166,10 +167,10 @@ python configure.py --all --build_variant Debug
 
 ![image-2](images/image_2.png)
 
-右击下图箭头位置“/”处，选择“Create/Mesh”即可创建一个网格节点窗口
+右击下图箭头位置“/”处，选择“Create/Mesh”即可创建一个名为`mesh_0`的目录。如图所示：
 
 ![image-3](images/image_3.png)
 
-右击节点编辑窗口，选择并添加节点，例如通过 `create_grid`和 `write_polyscope`即可创建一个yz平面上的网格，并显示在 `Polyscope Renderer`窗口中，转动视角即可看到网格，如图所示：
+右击`mesh_0`，选择“Edit”即可打开节点编辑窗口。右击节点编辑窗口，选择并添加节点，例如通过`create_grid`和`write_polyscope`即可创建一个yz平面上的网格，并显示在`Polyscope Renderer`窗口中，转动视角即可看到网格，如图所示：
 
 ![image-4](images/image_4.png)

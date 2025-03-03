@@ -9,6 +9,11 @@ project(
   LANGUAGES C CXX
 )
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
 set(OUT_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Binaries/${CMAKE_BUILD_TYPE})
 message("Build binaries to ${OUT_BINARY_DIR}")
 set(OUTPUT_DIR
@@ -57,10 +62,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fms-extensions")
-endif()
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
 set(CMAKE_CUDA_STANDARD 20)
