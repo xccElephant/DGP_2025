@@ -1,2 +1,5 @@
 PyOpenGL
 PySide6
+numpy
+requests
+tqdm
