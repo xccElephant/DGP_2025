@@ -185,7 +185,8 @@ python configure.py --all --build_variant Debug
 在构建依赖过程中python可能会缺少一些安装包，通过 pip install ... 安装后再次构建依赖即可
 
 ## 使用方法简介
-打开项目并编译后，运行`USTC_CG_polyscope_test`项目（可执行文件位于`Binaries/Debug`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
+
+打开项目并编译后，运行 `USTC_CG_polyscope_test`项目（可执行文件位于 `Binaries`下），可以看到其中包含数个窗口，堆叠在右上角。如图所示：
 
 ![image-1](images/image_1.png)
 
@@ -197,6 +198,6 @@ python configure.py --all --build_variant Debug
 
 ![image-3](images/image_3.png)
 
-右击`mesh_0`，选择“Edit”即可打开节点编辑窗口。右击节点编辑窗口，选择并添加节点，例如通过`create_grid`和`write_polyscope`即可创建一个yz平面上的网格，并显示在`Polyscope Renderer`窗口中，转动视角即可看到网格，如图所示：
+右击节点编辑窗口，选择并添加节点，例如通过 `create_grid`和 `write_polyscope`即可创建一个yz平面上的网格，并显示在 `Polyscope Renderer`窗口中，转动视角即可看到网格，如图所示：
 
 ![image-4](images/image_4.png)
