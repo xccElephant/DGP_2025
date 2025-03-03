@@ -47,7 +47,7 @@ bool find_shortest_path(
 
 1. 首先在`Polyscope Structure Info`窗口中打开`/mesh_0`网格的`Edges`选项，显示网格的边，方便点击选取顶点。
 
-2. 在`Polyscope Renderer`窗口中ctrl+左键点击选取起点，左键点击选取终点。其中左键点击的顶点/面信息会显示在`Polyscope Picking Info`窗口中。
+2. 在`Polyscope Renderer`窗口中ctrl+左键点击选取起点，左键点击选取终点。点击选取的顶点/面信息会显示在`Polyscope Picking Info`窗口中，所以可以通过观察该窗口来确认是否选中了顶点。
 
 选好两个顶点之后，最短路径将通过一条折线显示在网格上。
 
