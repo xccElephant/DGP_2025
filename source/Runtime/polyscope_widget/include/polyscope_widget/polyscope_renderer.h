@@ -11,6 +11,9 @@
 #include "polyscope/types.h"
 #include "polyscope/view.h"
 #include "polyscope_widget/api.h"
+#include "pxr/base/tf/token.h"
+#include "pxr/usd/usd/stage.h"
+#include "stage/stage.hpp"
 
 USTC_CG_NAMESPACE_OPEN_SCOPE
 
@@ -20,7 +23,7 @@ class NodeTree;
 
 class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
    public:
-    explicit PolyscopeRenderer();
+    explicit PolyscopeRenderer(Stage* stage);
     ~PolyscopeRenderer() override;
 
     bool BuildUI() override;
@@ -56,6 +59,7 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     // void End() override;
 
    private:
+    Stage* stage_;
     std::vector<unsigned char> buffer;
     std::vector<unsigned char> flipped_buffer;
 
@@ -70,6 +74,7 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
 
     void GetFrameBuffer();
     void DrawMenuBar();
+    void RegisterStructures();
     void DrawFrame();
 
     static std::vector<std::pair<polyscope::Structure*, size_t>> pick_result;

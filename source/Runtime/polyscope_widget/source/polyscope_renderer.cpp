@@ -1,16 +1,17 @@
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <cstddef>
+#include <pxr/base/gf/vec3f.h>
 
-#include "glm/ext/matrix_transform.hpp"
 #include "imgui_internal.h"
 
 #endif
 
+#include <cstddef>
 #include <thread>
 #include <vector>
 
 #include "RHI/rhi.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "imgui.h"
 #include "nvrhi/nvrhi.h"
 #include "polyscope/curve_network.h"
@@ -22,6 +23,10 @@
 #include "polyscope/surface_mesh.h"
 #include "polyscope/transformation_gizmo.h"
 #include "polyscope_widget/polyscope_renderer.h"
+#include "pxr/base/vt/array.h"
+#include "pxr/usd/usdGeom/curves.h"
+#include "pxr/usd/usdGeom/points.h"
+#include "pxr/usd/usdGeom/xform.h"
 
 USTC_CG_NAMESPACE_OPEN_SCOPE
 
@@ -74,7 +79,7 @@ std::vector<std::pair<polyscope::Structure*, size_t>>
 //     ImGui::PopItemWidth();
 // }
 
-PolyscopeRenderer::PolyscopeRenderer()
+PolyscopeRenderer::PolyscopeRenderer(Stage* stage) : stage_(stage)
 {
     // polyscope::options::buildGui = false;
     polyscope::options::automaticallyComputeSceneExtents = false;
@@ -203,6 +208,91 @@ void PolyscopeRenderer::DrawMenuBar()
     }
 }
 
+void RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
+{
+    // Register structures from stage
+    // auto stage = GlobalUsdStage::stage;
+    // auto prim = stage->GetPrimAtPath(path);
+    if (!prim) {
+        return;
+    }
+
+    // Go recursively through
+    auto children = prim.GetChildren();
+    if (!children.empty()) {
+        for (const auto& child : children) {
+            RegisterGeometryFromPrim(child);
+        }
+        return;
+    }
+
+    auto primTypeName = prim.GetTypeName();
+    if (primTypeName == "Mesh") {
+        auto mesh = pxr::UsdGeomMesh(prim);
+        pxr::VtArray<pxr::GfVec3f> points;
+        mesh.GetPointsAttr().Get(&points);
+        std::vector<glm::vec3> vertices;
+        for (size_t i = 0; i < points.size(); i++) {
+            vertices.push_back({ points[i][0], points[i][1], points[i][2] });
+        }
+        pxr::VtArray<int> faceVertexCounts;
+        mesh.GetFaceVertexCountsAttr().Get(&faceVertexCounts);
+        pxr::VtArray<int> faceVertexIndices;
+        mesh.GetFaceVertexIndicesAttr().Get(&faceVertexIndices);
+        // Nested list of faces
+        std::vector<std::vector<size_t>> faceVertexIndicesNested(
+            faceVertexCounts.size());
+        size_t start = 0;
+        for (size_t i = 0; i < faceVertexCounts.size(); i++) {
+            std::vector<size_t> face;
+            for (size_t j = 0; j < faceVertexCounts[i]; j++) {
+                face.push_back(faceVertexIndices[start + j]);
+            }
+            faceVertexIndicesNested[i] = face;
+            start += faceVertexCounts[i];
+        }
+        polyscope::registerSurfaceMesh(
+            prim.GetPath().GetString(), vertices, faceVertexIndicesNested);
+    }
+    else if (primTypeName == "Points") {
+        auto points = pxr::UsdGeomPoints(prim);
+        pxr::VtArray<pxr::GfVec3f> positions;
+        points.GetPointsAttr().Get(&positions);
+        polyscope::registerPointCloud(prim.GetPath().GetString(), positions);
+    }
+    else if (primTypeName == "Curves") {
+        auto curves = pxr::UsdGeomCurves(prim);
+        pxr::VtArray<pxr::GfVec3f> points;
+        curves.GetPointsAttr().Get(&points);
+        pxr::VtArray<int> curveVertexCounts;
+        curves.GetCurveVertexCountsAttr().Get(&curveVertexCounts);
+        std::vector<std::array<size_t, 2>> edges;
+        size_t start = 0;
+        for (size_t i = 0; i < curveVertexCounts.size(); i++) {
+            for (size_t j = 0; j < curveVertexCounts[i] - 1; j++) {
+                edges.push_back({ start + j, start + j + 1 });
+            }
+            start += curveVertexCounts[i];
+        }
+        polyscope::registerCurveNetwork(
+            prim.GetPath().GetString(), points, edges);
+    }
+    else {
+        // TODO
+    }
+}
+
+void PolyscopeRenderer::RegisterStructures()
+{
+    polyscope::removeAllStructures();
+
+    // Register structures from stage
+    for (const auto& prim :
+         stage_->get_usd_stage()->GetPseudoRoot().GetChildren()) {
+        RegisterGeometryFromPrim(prim);
+    }
+}
+
 void PolyscopeRenderer::DrawFrame()
 {
     // DrawMenuBar();
@@ -217,6 +307,7 @@ void PolyscopeRenderer::DrawFrame()
     //     "io.WantCaptureKeyboard: %d", ImGui::GetIO().WantCaptureKeyboard);
     // ImGui::Text("num widgets: %d", polyscope::state::widgets.size());
 
+    RegisterStructures();
     GetFrameBuffer();
 
     ImVec2 imgui_frame_size =
