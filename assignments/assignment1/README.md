@@ -20,6 +20,8 @@
 
 完成`source/Editor/geometry_nodes/node_shortest_path.cpp`中的`find_shortest_path`函数，实现网格上的最短路径计算。其中网格数据结构为OpenMesh的`PolyMesh_ArrayKernelT`。
 
+你需要将最短路径的顶点索引填入`shortest_path_vertex_indices`中，并将最短路径的长度填入`distance`中。如果最短路径不存在，返回`false`，否则返回`true`。
+
 ```cpp
 typedef OpenMesh::PolyMesh_ArrayKernelT<> MyMesh;
 
@@ -42,6 +44,53 @@ bool find_shortest_path(
 ### 3. 测试最短路径计算
 
 将`assignment/assignment1`目录下的`satge.usdc`文件放到`Assets`目录下，然后运行程序，可以看到`Stage Viewer`窗口中出现了`mesh_0`项，右击`mesh_0`项，选择`Edit`打开节点编辑器后，所有节点自动由下向上计算。具体的逻辑可以观察节点编辑器。
+
+节点编辑器中，不同颜色的节点分别代表：
+
+-   蓝色的节点为执行成功的节点
+
+-   黄色的节点为希望执行，但输入不全，因此没有执行的节点
+
+-   红色的节点为执行失败的节点
+
+-   无色的节点为不希望执行的节点
+
+所以如果没有正常显示模型，或没有正确可视化时，可以通过观察节点的颜色得知发生错误的位置。例如，如果`load_obj_pxr`节点为红色，说明读取模型文件失败，可能是路径错误或文件不存在。
+
+节点编辑器会从希望执行的节点开始，向前寻找所有需要执行的节点，然后从前向后执行，并将输出传递给下一个节点。
+
+如果你想要编写节点，可以参考已经存在的节点文件的格式，首先需要包含`nodes/core/def/node_def.hpp`，然后分别使用以下的宏定义节点的输入输出、执行函数、是否希望执行等。
+
+```cpp
+// 开始定义节点
+NODE_DEF_OPEN_SCOPE
+
+// 定义节点的输入输出
+NODE_DECLARATION_FUNCTION(name_of_the_node)
+{
+    b.add_input<type>("input_name");
+    // ...
+    b.add_output<type>("output_name");
+    // ...
+}
+
+// 定义节点的执行函数
+NODE_EXECUTION_FUNCTION(name_of_the_node)
+{
+    // 当节点执行成功时，返回true以告知节点系统；否则返回false，节点系统将终止执行
+    return true;
+}
+
+// 若希望节点执行，则加上这个宏
+NODE_DECLARATION_REQUIRED(name_of_the_node)
+
+// 定义节点的显示名称
+NODE_DECLARATION_UI(name_of_the_node)
+
+// 结束定义节点
+NODE_DEF_CLOSE_SCOPE
+```
+
 
 选点方法：
 
