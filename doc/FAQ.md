@@ -63,3 +63,7 @@
 ## `atio6axx.dll`中发生`0xC0000005`错误
 
 开启独显直连，或者在显卡控制面板中找到框架程序，设置为独显运行
+
+## 无法定位程序输入点`vkGetDeviceBufferMemoryRequirements`于动态链接库`.../usd_hgiVulkan.dll`上
+
+更新显卡驱动
