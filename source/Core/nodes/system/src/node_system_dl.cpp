@@ -65,7 +65,8 @@ bool NodeDynamicLoadingSystem::load_configuration(
 {
     nlohmann::json j;
 
-    std::ifstream config_file(config_file_path);
+    auto abs_path = std::filesystem::absolute(config_file_path);
+    std::ifstream config_file(abs_path);
     if (!config_file.is_open()) {
         throw std::runtime_error(
             "Failed to open configuration file: " + config_file_path.string());
