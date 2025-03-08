@@ -8,6 +8,11 @@ project(
   VERSION 1.0
   LANGUAGES C CXX
 )
+
+# Python路径配置
+set(Python_ROOT_DIR "C:/Users/admin/miniconda3/envs/dgp")
+set(Python_EXECUTABLE "${Python_ROOT_DIR}/python.exe")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_BUILD_TYPE)
