@@ -1,4 +1,4 @@
-
+#include <pxr/base/gf/vec3f.h>
 #include <pxr/base/vt/array.h>
 
 #include <OpenMesh/Core/IO/MeshIO.hh>
