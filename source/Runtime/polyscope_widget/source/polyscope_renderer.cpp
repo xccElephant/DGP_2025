@@ -102,6 +102,11 @@ PolyscopeRenderer::PolyscopeRenderer(Stage* stage)
     // polyscope::registerPointCloud("my point cloud", points);
     // polyscope::state::userCallback = testCallback;
     xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
+
+    for (const auto& prim : stage_->get_usd_stage()->Traverse()) {
+        dirty_paths.insert(prim.GetPath());
+    }
+    UpdateStructures(dirty_paths);
 }
 
 PolyscopeRenderer::~PolyscopeRenderer()
@@ -203,6 +208,7 @@ void PolyscopeRenderer::GetFrameBuffer()
 {
     // buffer = polyscope::screenshotToBufferCustom(false);
     polyscope::drawCustom();
+    polyscope::render::engine->swapDisplayBuffers();
     buffer = polyscope::render::engine->readDisplayBuffer();
 }
 
@@ -228,6 +234,10 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
 
     auto xform = xform_cache.GetLocalToWorldTransform(prim);
     auto primTypeName = prim.GetTypeName().GetString();
+
+    // If the prim already exists, the type of the prim may have changed
+    // Remove the existing prim and re-register it
+    polyscope::removeStructure(prim.GetPath().GetString());
 
     if (primTypeName == "Mesh") {
         auto mesh = pxr::UsdGeomMesh(prim);
@@ -301,31 +311,21 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
     }
 }
 
-void PolyscopeRenderer::RegisterStructures()
+void PolyscopeRenderer::UpdateStructures(DirtyPathSet paths)
 {
-    // if (scene_dirty) {
-    //     scene_dirty = false;
-    //     xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
-    //     xform_cache.SetTime(stage_->get_current_time());
-    //     polyscope::removeAllStructures();
-    //     // Register structures from stage
-    //     for (const auto& prim : stage_->get_usd_stage()->Traverse()) {
-    //         RegisterGeometryFromPrim(prim);
+    // if (paths.size() > 0) {
+    //     std::cout << "Update structures: " << std::endl;
+    //     for (const auto& path : paths) {
+    //         std::cout << path.GetString() << std::endl;
     //     }
     // }
-    // else {
-    //     xform_cache.SetTime(stage_->get_current_time());
-    // }
-    {
-        stage_listener.GetDirtyPrims(dirty_prims);
-    }
     xform_cache = pxr::UsdGeomXformCache(stage_->get_current_time());
 
-    for (const auto& path : dirty_prims) {
+    for (const auto& path : dirty_paths) {
         pxr::UsdPrim prim = stage_->get_usd_stage()->GetPrimAtPath(path);
         if (!prim.IsValid()) {
             // Prim已删除，从渲染器移除
-            polyscope::removeStructure(prim.GetPath().GetString());
+            polyscope::removeStructure(path.GetString());
             continue;
         }
         RegisterGeometryFromPrim(prim);
@@ -347,7 +347,10 @@ void PolyscopeRenderer::DrawFrame()
     // ImGui::Text("num widgets: %d", polyscope::state::widgets.size());
 
     // scene_dirty = true;
-    RegisterStructures();
+    {
+        stage_listener.GetDirtyPaths(dirty_paths);
+    }
+    UpdateStructures(dirty_paths);
     GetFrameBuffer();
 
     ImVec2 imgui_frame_size =

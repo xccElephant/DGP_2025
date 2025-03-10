@@ -22,7 +22,7 @@ class BaseCamera;
 class FreeCamera;
 class NodeTree;
 
-using DirtyPrimSet = std::unordered_set<pxr::SdfPath, pxr::SdfPath::Hash>;
+using DirtyPathSet = std::unordered_set<pxr::SdfPath, pxr::SdfPath::Hash>;
 
 class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
    public:
@@ -74,7 +74,7 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     bool is_hovered = false;
 
     StageListener stage_listener;
-    DirtyPrimSet dirty_prims;
+    DirtyPathSet dirty_paths;
 
     std::chrono::time_point<std::chrono::steady_clock> lastMainLoopIterTime;
 
@@ -82,7 +82,7 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     void DrawMenuBar();
     pxr::UsdGeomXformCache xform_cache;
     void RegisterGeometryFromPrim(const pxr::UsdPrim& prim);
-    void RegisterStructures();
+    void UpdateStructures(DirtyPathSet paths);
     void DrawFrame();
 
     static std::vector<std::pair<polyscope::Structure*, size_t>> pick_result;
