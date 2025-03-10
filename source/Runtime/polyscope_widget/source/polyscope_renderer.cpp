@@ -84,7 +84,9 @@ std::vector<std::pair<polyscope::Structure*, size_t>>
 //     ImGui::PopItemWidth();
 // }
 
-PolyscopeRenderer::PolyscopeRenderer(Stage* stage) : stage_(stage)
+PolyscopeRenderer::PolyscopeRenderer(Stage* stage)
+    : stage_(stage),
+      stage_listener(stage_)
 {
     // polyscope::options::buildGui = false;
     polyscope::options::automaticallyComputeSceneExtents = false;
@@ -100,7 +102,6 @@ PolyscopeRenderer::PolyscopeRenderer(Stage* stage) : stage_(stage)
     // polyscope::registerPointCloud("my point cloud", points);
     // polyscope::state::userCallback = testCallback;
     xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
-    scene_dirty = true;
 }
 
 PolyscopeRenderer::~PolyscopeRenderer()
@@ -302,18 +303,32 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
 
 void PolyscopeRenderer::RegisterStructures()
 {
-    if (scene_dirty) {
-        scene_dirty = false;
-        xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
-        xform_cache.SetTime(stage_->get_current_time());
-        polyscope::removeAllStructures();
-        // Register structures from stage
-        for (const auto& prim : stage_->get_usd_stage()->Traverse()) {
-            RegisterGeometryFromPrim(prim);
-        }
+    // if (scene_dirty) {
+    //     scene_dirty = false;
+    //     xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
+    //     xform_cache.SetTime(stage_->get_current_time());
+    //     polyscope::removeAllStructures();
+    //     // Register structures from stage
+    //     for (const auto& prim : stage_->get_usd_stage()->Traverse()) {
+    //         RegisterGeometryFromPrim(prim);
+    //     }
+    // }
+    // else {
+    //     xform_cache.SetTime(stage_->get_current_time());
+    // }
+    {
+        stage_listener.GetDirtyPrims(dirty_prims);
     }
-    else {
-        xform_cache.SetTime(stage_->get_current_time());
+    xform_cache = pxr::UsdGeomXformCache(stage_->get_current_time());
+
+    for (const auto& path : dirty_prims) {
+        pxr::UsdPrim prim = stage_->get_usd_stage()->GetPrimAtPath(path);
+        if (!prim.IsValid()) {
+            // Prim已删除，从渲染器移除
+            polyscope::removeStructure(prim.GetPath().GetString());
+            continue;
+        }
+        RegisterGeometryFromPrim(prim);
     }
 }
 

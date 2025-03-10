@@ -14,12 +14,15 @@
 #include "pxr/base/tf/token.h"
 #include "pxr/usd/usd/stage.h"
 #include "stage/stage.hpp"
+#include "stage_listener/stage_listener.h"
 
 USTC_CG_NAMESPACE_OPEN_SCOPE
 
 class BaseCamera;
 class FreeCamera;
 class NodeTree;
+
+using DirtyPrimSet = std::unordered_set<pxr::SdfPath, pxr::SdfPath::Hash>;
 
 class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
    public:
@@ -40,11 +43,6 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     bool GetInputPickTriggered() const
     {
         return input_pick_triggered;
-    }
-
-    void SetSceneDirty()
-    {
-        scene_dirty = true;
     }
 
     static std::vector<std::pair<polyscope::Structure*, size_t>> GetPickResult()
@@ -75,7 +73,8 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     bool is_active = false;
     bool is_hovered = false;
 
-    bool scene_dirty = false;
+    StageListener stage_listener;
+    DirtyPrimSet dirty_prims;
 
     std::chrono::time_point<std::chrono::steady_clock> lastMainLoopIterTime;
 
