@@ -67,3 +67,7 @@
 ## 无法定位程序输入点`vkGetDeviceBufferMemoryRequirements`于动态链接库`.../usd_hgiVulkan.dll`上
 
 更新显卡驱动
+
+## 修改生成类型后（如从`Debug`改为`Release`），出现如`tbb.lib`等库无法打开
+
+重新进行CMake配置。因为在VS中修改生成类型后，CMake缓存并没有改变，而实际上必须修改缓存中的库路径才能正确生成。
