@@ -42,6 +42,11 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
         return input_pick_triggered;
     }
 
+    void SetSceneDirty()
+    {
+        scene_dirty = true;
+    }
+
     static std::vector<std::pair<polyscope::Structure*, size_t>> GetPickResult()
     {
         return pick_result;
@@ -70,10 +75,14 @@ class POLYSCOPE_WIDGET_API PolyscopeRenderer final : public IWidget {
     bool is_active = false;
     bool is_hovered = false;
 
+    bool scene_dirty = false;
+
     std::chrono::time_point<std::chrono::steady_clock> lastMainLoopIterTime;
 
     void GetFrameBuffer();
     void DrawMenuBar();
+    pxr::UsdGeomXformCache xform_cache;
+    void RegisterGeometryFromPrim(const pxr::UsdPrim& prim);
     void RegisterStructures();
     void DrawFrame();
 

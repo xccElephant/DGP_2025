@@ -1,8 +1,11 @@
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <pxr/base/gf/vec3f.h>
+
+#include <utility>
 
 #include "imgui_internal.h"
+#include "polyscope/render/engine.h"
+#include "polyscope/view.h"
 
 #endif
 
@@ -23,7 +26,9 @@
 #include "polyscope/surface_mesh.h"
 #include "polyscope/transformation_gizmo.h"
 #include "polyscope_widget/polyscope_renderer.h"
+#include "pxr/base/gf/vec3f.h"
 #include "pxr/base/vt/array.h"
+#include "pxr/usd/usd/primRange.h"
 #include "pxr/usd/usdGeom/curves.h"
 #include "pxr/usd/usdGeom/points.h"
 #include "pxr/usd/usdGeom/xform.h"
@@ -84,6 +89,7 @@ PolyscopeRenderer::PolyscopeRenderer(Stage* stage) : stage_(stage)
     // polyscope::options::buildGui = false;
     polyscope::options::automaticallyComputeSceneExtents = false;
     polyscope::init();
+    polyscope::view::bgColor = { 1.0, 1.0, 1.0, 1.0 };
     // Test register a structure
     // std::vector<glm::vec3> points;
     // for (int i = 0; i < 2000; i++) {
@@ -93,6 +99,8 @@ PolyscopeRenderer::PolyscopeRenderer(Stage* stage) : stage_(stage)
     // }
     // polyscope::registerPointCloud("my point cloud", points);
     // polyscope::state::userCallback = testCallback;
+    xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
+    scene_dirty = true;
 }
 
 PolyscopeRenderer::~PolyscopeRenderer()
@@ -192,7 +200,9 @@ void PolyscopeRenderer::BackBufferResized(
 
 void PolyscopeRenderer::GetFrameBuffer()
 {
-    buffer = polyscope::screenshotToBufferCustom(false);
+    // buffer = polyscope::screenshotToBufferCustom(false);
+    polyscope::drawCustom();
+    buffer = polyscope::render::engine->readDisplayBuffer();
 }
 
 void PolyscopeRenderer::DrawMenuBar()
@@ -208,74 +218,82 @@ void PolyscopeRenderer::DrawMenuBar()
     }
 }
 
-void RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
+void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
 {
     // Register structures from stage
-    // auto stage = GlobalUsdStage::stage;
-    // auto prim = stage->GetPrimAtPath(path);
     if (!prim) {
         return;
     }
 
-    // Go recursively through
-    auto children = prim.GetChildren();
-    if (!children.empty()) {
-        for (const auto& child : children) {
-            RegisterGeometryFromPrim(child);
-        }
-        return;
-    }
+    auto xform = xform_cache.GetLocalToWorldTransform(prim);
+    auto primTypeName = prim.GetTypeName().GetString();
 
-    auto primTypeName = prim.GetTypeName();
     if (primTypeName == "Mesh") {
         auto mesh = pxr::UsdGeomMesh(prim);
+
         pxr::VtArray<pxr::GfVec3f> points;
         mesh.GetPointsAttr().Get(&points);
-        std::vector<glm::vec3> vertices;
-        for (size_t i = 0; i < points.size(); i++) {
-            vertices.push_back({ points[i][0], points[i][1], points[i][2] });
-        }
-        pxr::VtArray<int> faceVertexCounts;
+        // std::vector<glm::vec3> vertices;
+        // vertices.reserve(points.size());
+        // for (const auto& point : points) {
+        //     vertices.emplace_back(glm::make_vec3(point.GetArray()));
+        // }
+
+        pxr::VtArray<int> faceVertexCounts, faceVertexIndices;
         mesh.GetFaceVertexCountsAttr().Get(&faceVertexCounts);
-        pxr::VtArray<int> faceVertexIndices;
         mesh.GetFaceVertexIndicesAttr().Get(&faceVertexIndices);
         // Nested list of faces
-        std::vector<std::vector<size_t>> faceVertexIndicesNested(
-            faceVertexCounts.size());
+        std::vector<std::vector<size_t>> faceVertexIndicesNested;
+        faceVertexIndicesNested.reserve(faceVertexCounts.size());
         size_t start = 0;
-        for (size_t i = 0; i < faceVertexCounts.size(); i++) {
+        for (int count : faceVertexCounts) {
             std::vector<size_t> face;
-            for (size_t j = 0; j < faceVertexCounts[i]; j++) {
+            face.reserve(count);
+            for (int j = 0; j < count; ++j) {
                 face.push_back(faceVertexIndices[start + j]);
             }
-            faceVertexIndicesNested[i] = face;
-            start += faceVertexCounts[i];
+            faceVertexIndicesNested.push_back(std::move(face));
+            start += count;
         }
-        polyscope::registerSurfaceMesh(
-            prim.GetPath().GetString(), vertices, faceVertexIndicesNested);
+        auto surface_mesh = polyscope::registerSurfaceMesh(
+            prim.GetPath().GetString(),
+            std::move(points),
+            std::move(faceVertexIndicesNested));
+        surface_mesh->setTransform(glm::make_mat4(xform.GetArray()));
     }
     else if (primTypeName == "Points") {
         auto points = pxr::UsdGeomPoints(prim);
         pxr::VtArray<pxr::GfVec3f> positions;
         points.GetPointsAttr().Get(&positions);
-        polyscope::registerPointCloud(prim.GetPath().GetString(), positions);
+        auto point_cloud = polyscope::registerPointCloud(
+            prim.GetPath().GetString(), std::move(positions));
+        point_cloud->setTransform(glm::make_mat4(xform.GetArray()));
     }
-    else if (primTypeName == "Curves") {
+    else if (primTypeName == "BasisCurves") {
         auto curves = pxr::UsdGeomCurves(prim);
         pxr::VtArray<pxr::GfVec3f> points;
         curves.GetPointsAttr().Get(&points);
         pxr::VtArray<int> curveVertexCounts;
         curves.GetCurveVertexCountsAttr().Get(&curveVertexCounts);
+
+        size_t nEdges = 0;
+        for (int count : curveVertexCounts) {
+            nEdges += count - 1;
+        }
+
         std::vector<std::array<size_t, 2>> edges;
+        edges.reserve(nEdges);
+
         size_t start = 0;
-        for (size_t i = 0; i < curveVertexCounts.size(); i++) {
-            for (size_t j = 0; j < curveVertexCounts[i] - 1; j++) {
+        for (int count : curveVertexCounts) {
+            for (int j = 0; j < count - 1; ++j) {
                 edges.push_back({ start + j, start + j + 1 });
             }
-            start += curveVertexCounts[i];
+            start += count;
         }
-        polyscope::registerCurveNetwork(
-            prim.GetPath().GetString(), points, edges);
+        auto curve_network = polyscope::registerCurveNetwork(
+            prim.GetPath().GetString(), std::move(points), std::move(edges));
+        curve_network->setTransform(glm::make_mat4(xform.GetArray()));
     }
     else {
         // TODO
@@ -284,12 +302,18 @@ void RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
 
 void PolyscopeRenderer::RegisterStructures()
 {
-    polyscope::removeAllStructures();
-
-    // Register structures from stage
-    for (const auto& prim :
-         stage_->get_usd_stage()->GetPseudoRoot().GetChildren()) {
-        RegisterGeometryFromPrim(prim);
+    if (scene_dirty) {
+        scene_dirty = false;
+        xform_cache = pxr::UsdGeomXformCache(pxr::UsdTimeCode::Default());
+        xform_cache.SetTime(stage_->get_current_time());
+        polyscope::removeAllStructures();
+        // Register structures from stage
+        for (const auto& prim : stage_->get_usd_stage()->Traverse()) {
+            RegisterGeometryFromPrim(prim);
+        }
+    }
+    else {
+        xform_cache.SetTime(stage_->get_current_time());
     }
 }
 
@@ -307,6 +331,7 @@ void PolyscopeRenderer::DrawFrame()
     //     "io.WantCaptureKeyboard: %d", ImGui::GetIO().WantCaptureKeyboard);
     // ImGui::Text("num widgets: %d", polyscope::state::widgets.size());
 
+    // scene_dirty = true;
     RegisterStructures();
     GetFrameBuffer();
 
