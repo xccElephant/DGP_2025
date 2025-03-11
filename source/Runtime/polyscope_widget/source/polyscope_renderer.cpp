@@ -1,16 +1,17 @@
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 
-#include <utility>
+#include <string>
 
 #include "imgui_internal.h"
-#include "polyscope/render/engine.h"
-#include "polyscope/view.h"
 
 #endif
 
+#include <pxr/usd/usdGeom/primvarsAPI.h>
+
 #include <cstddef>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "RHI/rhi.hpp"
@@ -22,9 +23,11 @@
 #include "polyscope/pick.h"
 #include "polyscope/point_cloud.h"
 #include "polyscope/polyscope.h"
+#include "polyscope/render/engine.h"
 #include "polyscope/screenshot.h"
 #include "polyscope/surface_mesh.h"
 #include "polyscope/transformation_gizmo.h"
+#include "polyscope/view.h"
 #include "polyscope_widget/polyscope_renderer.h"
 #include "pxr/base/gf/vec3f.h"
 #include "pxr/base/vt/array.h"
@@ -91,7 +94,7 @@ PolyscopeRenderer::PolyscopeRenderer(Stage* stage)
     // polyscope::options::buildGui = false;
     polyscope::options::automaticallyComputeSceneExtents = false;
     polyscope::init();
-    polyscope::view::bgColor = { 1.0, 1.0, 1.0, 1.0 };
+    // polyscope::view::bgColor = { 1.0, 1.0, 1.0, 1.0 };
     // Test register a structure
     // std::vector<glm::vec3> points;
     // for (int i = 0; i < 2000; i++) {
@@ -206,10 +209,10 @@ void PolyscopeRenderer::BackBufferResized(
 
 void PolyscopeRenderer::GetFrameBuffer()
 {
-    // buffer = polyscope::screenshotToBufferCustom(false);
-    polyscope::drawCustom();
-    polyscope::render::engine->swapDisplayBuffers();
-    buffer = polyscope::render::engine->readDisplayBuffer();
+    buffer = polyscope::screenshotToBufferCustom(false);
+    // polyscope::drawCustom();
+    // polyscope::render::engine->swapDisplayBuffers();
+    // buffer = polyscope::render::engine->readDisplayBuffer();
 }
 
 void PolyscopeRenderer::DrawMenuBar()
@@ -222,6 +225,131 @@ void PolyscopeRenderer::DrawMenuBar()
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
+    }
+}
+
+void RegisterMeshQuantities(
+    const pxr::UsdGeomMesh& mesh,
+    polyscope::SurfaceMesh* surface_mesh)
+{
+    auto primVarAPI = pxr::UsdGeomPrimvarsAPI(mesh);
+    auto primvars = primVarAPI.GetPrimvars();
+
+    for (const auto& primvar : primvars) {
+        std::string full_name = primvar.GetName();
+
+        if (full_name.find("primvars:polyscope:") == 0) {
+            std::string name_without_prefix = full_name.substr(19);
+
+            // Vertex scalar
+            if (name_without_prefix.find("vertex:scalar:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(14);
+                pxr::VtArray<float> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addVertexScalarQuantity(
+                        quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Face scalar
+            if (name_without_prefix.find("face:scalar:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(12);
+                pxr::VtArray<float> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addFaceScalarQuantity(quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Vertex color
+            if (name_without_prefix.find("vertex:color:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(13);
+                pxr::VtArray<pxr::GfVec3f> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addVertexColorQuantity(quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Face color
+            if (name_without_prefix.find("face:color:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(11);
+                pxr::VtArray<pxr::GfVec3f> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addFaceColorQuantity(quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Vertex vector
+            if (name_without_prefix.find("vertex:vector:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(14);
+                pxr::VtArray<pxr::GfVec3f> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addVertexVectorQuantity(
+                        quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Face vector
+            if (name_without_prefix.find("face:vector:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(12);
+                pxr::VtArray<pxr::GfVec3f> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addFaceVectorQuantity(quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Vertex parameterization
+            if (name_without_prefix.find("vertex:parameterization:") == 0) {
+                std::string quantity_name = name_without_prefix.substr(24);
+                pxr::VtArray<pxr::GfVec2f> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addVertexParameterizationQuantity(
+                        quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+
+            // Face corner parameterization
+            if (name_without_prefix.find("face_corner:parameterization:") ==
+                0) {
+                std::string quantity_name = name_without_prefix.substr(29);
+                pxr::VtArray<pxr::GfVec2f> values;
+                primvar.Get(&values);
+                try {
+                    surface_mesh->addParameterizationQuantity(
+                        quantity_name, values);
+                }
+                catch (std::exception& e) {
+                    std::cerr << e.what() << std::endl;
+                }
+            }
+        }
     }
 }
 
@@ -271,6 +399,7 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
             std::move(points),
             std::move(faceVertexIndicesNested));
         surface_mesh->setTransform(glm::make_mat4(xform.GetArray()));
+        RegisterMeshQuantities(mesh, surface_mesh);
     }
     else if (primTypeName == "Points") {
         auto points = pxr::UsdGeomPoints(prim);
