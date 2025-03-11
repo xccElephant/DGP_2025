@@ -51,7 +51,7 @@ git pullall
 
 其中网格数据结构为OpenMesh的`PolyMesh_ArrayKernelT`，`pxr::VtArray<float>`是OpenUSD提供的数组类型，可以当作`std::vector<float>`使用。
 
-你需要将每个顶点的曲率按照顶点索引的顺序填入`shortest_path_vertex_indices`中，无需返回值。
+你需要将每个顶点的曲率按照顶点索引的顺序填入`mean_curvature`和`gaussian_curvature`中。
 
 ```cpp
 typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
