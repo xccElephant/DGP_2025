@@ -83,7 +83,15 @@ bool NodeDynamicLoadingSystem::load_configuration(
     }
 #endif
 
-    auto abs_path = executable_path / config_file_path;
+    std::filesystem::path abs_path;
+
+    if (!config_file_path.is_absolute()) {
+        abs_path = executable_path / config_file_path;
+    }
+    else {
+        abs_path = config_file_path;
+    }
+    abs_path = abs_path.lexically_normal();
     std::ifstream config_file(abs_path);
     if (!config_file.is_open()) {
         throw std::runtime_error(

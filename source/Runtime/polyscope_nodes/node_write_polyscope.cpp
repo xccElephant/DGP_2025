@@ -21,7 +21,7 @@
 
 NODE_DEF_OPEN_SCOPE
 
-NODE_DECLARATION_FUNCTION(write_polyscope_deprecated)
+NODE_DECLARATION_FUNCTION(write_polyscope)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<float>("Time Code").default_val(0).min(0).max(240);
@@ -42,7 +42,7 @@ bool legal(const std::string& string)
 
 // TODO: Test and add support for materials and textures
 // The current implementation has not been fully tested yet
-NODE_EXECUTION_FUNCTION(write_polyscope_deprecated)
+NODE_EXECUTION_FUNCTION(write_polyscope)
 {
     auto global_payload = params.get_global_payload<GeomPayload>();
 
@@ -325,7 +325,8 @@ NODE_EXECUTION_FUNCTION(write_polyscope_deprecated)
     }
 
     if (!structure) {
-        polyscope::exception("No geometry found");
+        // polyscope::exception("No geometry found");
+        std::cerr << "No Geometry found!" << std::endl;
         return false;
     }
 
@@ -528,7 +529,7 @@ NODE_EXECUTION_FUNCTION(write_polyscope_deprecated)
     return true;
 }
 
-NODE_DECLARATION_REQUIRED(write_polyscope_deprecated);
+NODE_DECLARATION_REQUIRED(write_polyscope);
 
-NODE_DECLARATION_UI(write_polyscope_deprecated);
+NODE_DECLARATION_UI(write_polyscope);
 NODE_DEF_CLOSE_SCOPE
