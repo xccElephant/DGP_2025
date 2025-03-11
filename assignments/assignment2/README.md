@@ -43,7 +43,7 @@ git pullall
 
 打开VS之后，按下`Ctrl+Shift+B`完整编译项目，然后按下`F5`运行项目即可。
 
-万一出现无法正确运行的问题，尝试“生成”-“重新生成解决方案”/“全部重新生成”。
+**万一出现无法正确运行的问题，尝试“生成”-“重新生成解决方案”/“全部重新生成”。**
 
 ### 2. 实现离散平均曲率和高斯曲率计算
 
@@ -76,6 +76,8 @@ void compute_gaussian_curvature(
 ### 3. 测试曲率计算
 
 将`assignment/assignment2`目录下的`satge.usdc`文件放到`Assets`目录下，然后运行程序，可以看到`Stage Viewer`窗口中出现了`mesh_0`项，右击`mesh_0`项，选择`Edit`打开节点编辑器后，所有节点自动由下向上计算，将计算结果用作为一个`Polyscope`的`Scalar Quantity`绑定在网格的顶点上。你可以在`Polyscope Structure Info`窗口中找到`/mesh_0`网格的，启用`mean_curvature`或`gaussian_curvature`查看计算结果。
+
+**注意：当前已知一个问题，鼠标点击节点编辑器窗口（添加节点、连接节点、点击节点、点击编辑器背景等操作）后，可视化结果会消失，此时需要右击`write_polyscope`节点，选择`Run`重新计算。**
 
 节点编辑器中，不同颜色的节点分别代表：
 
