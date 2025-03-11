@@ -1,4 +1,5 @@
 #include <random>
+#include <string>
 
 #include "GCore/Components/MeshOperand.h"
 #include "GCore/GOP.h"
@@ -12,6 +13,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_vertex_scalar_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<float>>("Vertex scalar");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -20,6 +22,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_scalar_quantity)
 {
     auto mesh = params.get_input<Geometry>("Geometry");
     auto vertexScalar = params.get_input<pxr::VtArray<float>>("Vertex scalar");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -31,7 +34,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_scalar_quantity)
         return false;
     }
 
-    meshComponent->add_vertex_scalar_quantity(vertexScalar);
+    meshComponent->add_vertex_scalar_quantity(quantityName, vertexScalar);
     params.set_output("Geometry", std::move(mesh));
     // params.set_output("Mesh", mesh);
     return true;
@@ -41,6 +44,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_face_scalar_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<float>>("Face scalar");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -49,6 +53,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_scalar_quantity)
 {
     auto mesh = params.get_input<Geometry>("Geometry");
     auto faceScalar = params.get_input<pxr::VtArray<float>>("Face scalar");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -60,7 +65,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_scalar_quantity)
         return false;
     }
 
-    meshComponent->add_face_scalar_quantity(faceScalar);
+    meshComponent->add_face_scalar_quantity(quantityName, faceScalar);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
@@ -69,6 +74,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_vertex_color_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<pxr::GfVec3f>>("Vertex color");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -78,6 +84,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_color_quantity)
     auto mesh = params.get_input<Geometry>("Geometry");
     auto vertexColor =
         params.get_input<pxr::VtArray<pxr::GfVec3f>>("Vertex color");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -89,7 +96,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_color_quantity)
         return false;
     }
 
-    meshComponent->add_vertex_color_quantity(vertexColor);
+    meshComponent->add_vertex_color_quantity(quantityName, vertexColor);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
@@ -98,6 +105,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_face_color_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<pxr::GfVec3f>>("Face color");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -106,6 +114,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_color_quantity)
 {
     auto mesh = params.get_input<Geometry>("Geometry");
     auto faceColor = params.get_input<pxr::VtArray<pxr::GfVec3f>>("Face color");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -117,7 +126,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_color_quantity)
         return false;
     }
 
-    meshComponent->add_face_color_quantity(faceColor);
+    meshComponent->add_face_color_quantity(quantityName, faceColor);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
@@ -126,6 +135,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_vertex_vector_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<pxr::GfVec3f>>("Vertex vector");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -135,6 +145,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_vector_quantity)
     auto mesh = params.get_input<Geometry>("Geometry");
     auto vertexVector =
         params.get_input<pxr::VtArray<pxr::GfVec3f>>("Vertex vector");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -146,7 +157,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_vector_quantity)
         return false;
     }
 
-    meshComponent->add_vertex_vector_quantity(vertexVector);
+    meshComponent->add_vertex_vector_quantity(quantityName, vertexVector);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
@@ -155,6 +166,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_face_vector_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<pxr::GfVec3f>>("Face vector");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -164,6 +176,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_vector_quantity)
     auto mesh = params.get_input<Geometry>("Geometry");
     auto faceVector =
         params.get_input<pxr::VtArray<pxr::GfVec3f>>("Face vector");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -175,7 +188,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_vector_quantity)
         return false;
     }
 
-    meshComponent->add_face_vector_quantity(faceVector);
+    meshComponent->add_face_vector_quantity(quantityName, faceVector);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
@@ -184,6 +197,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_vertex_parameterization_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<pxr::GfVec2f>>("Vertex parameterization");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -193,6 +207,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_parameterization_quantity)
     auto mesh = params.get_input<Geometry>("Geometry");
     auto vertexParameterization =
         params.get_input<pxr::VtArray<pxr::GfVec2f>>("Vertex parameterization");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -204,7 +219,8 @@ NODE_EXECUTION_FUNCTION(mesh_add_vertex_parameterization_quantity)
         return false;
     }
 
-    meshComponent->add_vertex_parameterization_quantity(vertexParameterization);
+    meshComponent->add_vertex_parameterization_quantity(
+        quantityName, vertexParameterization);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
@@ -213,6 +229,7 @@ NODE_DECLARATION_FUNCTION(mesh_add_face_corner_parameterization_quantity)
 {
     b.add_input<Geometry>("Geometry");
     b.add_input<pxr::VtArray<pxr::GfVec2f>>("Face corner parameterization");
+    b.add_input<std::string>("Quantity name");
 
     b.add_output<Geometry>("Geometry");
 }
@@ -223,6 +240,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_corner_parameterization_quantity)
     auto faceCornerParameterization =
         params.get_input<pxr::VtArray<pxr::GfVec2f>>(
             "Face corner parameterization");
+    auto quantityName = params.get_input<std::string>("Quantity name");
 
     auto meshComponent = mesh.get_component<MeshComponent>();
 
@@ -236,7 +254,7 @@ NODE_EXECUTION_FUNCTION(mesh_add_face_corner_parameterization_quantity)
     }
 
     meshComponent->add_face_corner_parameterization_quantity(
-        faceCornerParameterization);
+        quantityName, faceCornerParameterization);
     params.set_output("Geometry", std::move(mesh));
     return true;
 }
