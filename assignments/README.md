@@ -8,3 +8,5 @@
 
 - [作业一](./assignment1/README.md)：最短路径计算  
   Deadline: 23:59, 2025-03-09
+
+- [作业二](./assignment2/README.md)：网格数据结构
