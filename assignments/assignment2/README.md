@@ -6,6 +6,8 @@
 
 具体来说，以读取`obj`文件为例，`load_obj_pxr`节点和`write_usd`节点会将模型数据写入到`USD stage`中，`read_usd`节点会从`USD stage`中读取模型数据。由于此时模型已经存储在`USD stage`中，所以可以删去`write_usd`节点的连接，`read_usd`节点依然可以读取到模型，**而且关闭程序后再次打开，模型依然存在**。
 
+此外，大部分读取路径的逻辑都修改为了相对于可执行文件的路径（例如`Binaries/Debug`），因此应该不再需要自行修改读取路径，**而`stage.usdc`文件应该存在根目录下的`Assets`文件夹中**。
+
 ## 实验步骤
 
 ### 1. Git 拉取仓库更新
@@ -77,7 +79,7 @@ void compute_gaussian_curvature(
 
 将`assignment/assignment2`目录下的`satge.usdc`文件放到`Assets`目录下，然后运行程序，可以看到`Stage Viewer`窗口中出现了`mesh_0`项，右击`mesh_0`项，选择`Edit`打开节点编辑器后，所有节点自动由下向上计算，将计算结果用作为一个`Polyscope`的`Scalar Quantity`绑定在网格的顶点上。你可以在`Polyscope Structure Info`窗口中找到`/mesh_0`网格的，启用`mean_curvature`或`gaussian_curvature`查看计算结果。
 
-**注意：当前已知一个问题，鼠标点击节点编辑器窗口（添加节点、连接节点、点击节点、点击编辑器背景等操作）后，可视化结果会消失，此时需要右击`write_polyscope`节点，选择`Run`重新计算。**
+**注意：当前已知一个问题，鼠标点击节点编辑器窗口（添加节点、连接节点、点击节点、点击编辑器背景等操作）后，选点信息消失，须重新选点**
 
 节点编辑器中，不同颜色的节点分别代表：
 
