@@ -363,11 +363,25 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
     auto xform = xform_cache.GetLocalToWorldTransform(prim);
     auto primTypeName = prim.GetTypeName().GetString();
 
+    // Remove pick result if the structure is picked
+    for (auto& result : pick_result) {
+        if (result.first != nullptr &&
+            result.first->name == prim.GetPath().GetString()) {
+            result = { nullptr, 0 };
+        }
+    }
+    if (curr_visualization_structure != nullptr) {
+        curr_visualization_structure->remove();
+        curr_visualization_structure = nullptr;
+    }
+
     // If the prim already exists, the type of the prim may have changed
     // Remove the existing prim and re-register it
-    polyscope::removeStructure(prim.GetPath().GetString());
 
     if (primTypeName == "Mesh") {
+        polyscope::removeStructure("Point Cloud", prim.GetPath().GetString());
+        polyscope::removeStructure("Curve Network", prim.GetPath().GetString());
+
         auto mesh = pxr::UsdGeomMesh(prim);
 
         pxr::VtArray<pxr::GfVec3f> points;
@@ -402,6 +416,9 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
         RegisterMeshQuantities(mesh, surface_mesh);
     }
     else if (primTypeName == "Points") {
+        polyscope::removeStructure("Surface Mesh", prim.GetPath().GetString());
+        polyscope::removeStructure("Curve Network", prim.GetPath().GetString());
+
         auto points = pxr::UsdGeomPoints(prim);
         pxr::VtArray<pxr::GfVec3f> positions;
         points.GetPointsAttr().Get(&positions);
@@ -410,6 +427,9 @@ void PolyscopeRenderer::RegisterGeometryFromPrim(const pxr::UsdPrim& prim)
         point_cloud->setTransform(glm::make_mat4(xform.GetArray()));
     }
     else if (primTypeName == "BasisCurves") {
+        polyscope::removeStructure("Surface Mesh", prim.GetPath().GetString());
+        polyscope::removeStructure("Point Cloud", prim.GetPath().GetString());
+
         auto curves = pxr::UsdGeomCurves(prim);
         pxr::VtArray<pxr::GfVec3f> points;
         curves.GetPointsAttr().Get(&points);
