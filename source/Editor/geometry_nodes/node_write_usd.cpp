@@ -106,8 +106,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
             for (const std::string& name :
                  mesh->get_vertex_scalar_quantity_names()) {
                 auto values = mesh->get_vertex_scalar_quantity(name);
-                std::string primvar_name = "polyscope:vertex:scalar:" + name;
-                primvar_name = std::string(primvar_name.c_str());
+                const std::string primvar_name =
+                    "polyscope:vertex:scalar:" + name;
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->FloatArray);
@@ -118,8 +118,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
             for (const std::string& name :
                  mesh->get_face_scalar_quantity_names()) {
                 auto values = mesh->get_face_scalar_quantity(name);
-                std::string primvar_name = "polyscope:face:scalar:" + name;
-                primvar_name = std::string(primvar_name.c_str());
+                const std::string primvar_name =
+                    "polyscope:face:scalar:" + name;
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->FloatArray);
@@ -129,8 +129,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
 
             for (std::string& name : mesh->get_vertex_color_quantity_names()) {
                 auto values = mesh->get_vertex_color_quantity(name);
-                std::string primvar_name = "polyscope:vertex:color:" + name;
-                primvar_name = std::string(primvar_name.c_str());
+                const std::string primvar_name =
+                    "polyscope:vertex:color:" + name;
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->Color3fArray);
@@ -141,8 +141,7 @@ NODE_EXECUTION_FUNCTION(write_usd)
             for (const std::string& name :
                  mesh->get_face_color_quantity_names()) {
                 auto values = mesh->get_face_color_quantity(name);
-                std::string primvar_name = "polyscope:face:color:" + name;
-                primvar_name = std::string(primvar_name.c_str());
+                const std::string primvar_name = "polyscope:face:color:" + name;
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->Color3fArray);
@@ -153,8 +152,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
             for (const std::string& name :
                  mesh->get_vertex_vector_quantity_names()) {
                 auto values = mesh->get_vertex_vector_quantity(name);
-                std::string primvar_name = "polyscope:vertex:vector:" + name;
-                primvar_name = std::string(primvar_name.c_str());
+                const std::string primvar_name =
+                    "polyscope:vertex:vector:" + name;
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->Vector3fArray);
@@ -165,8 +164,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
             for (const std::string& name :
                  mesh->get_face_vector_quantity_names()) {
                 auto values = mesh->get_face_vector_quantity(name);
-                std::string primvar_name = "polyscope:face:vector:" + name;
-                primvar_name = std::string(primvar_name.c_str());
+                const std::string primvar_name =
+                    "polyscope:face:vector:" + name;
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->Vector3fArray);
@@ -178,9 +177,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
                  mesh->get_face_corner_parameterization_quantity_names()) {
                 auto values =
                     mesh->get_face_corner_parameterization_quantity(name);
-                std::string primvar_name =
+                const std::string primvar_name =
                     "polyscope:face_corner:parameterization:" + name;
-                primvar_name = std::string(primvar_name.c_str());
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->TexCoord2fArray);
@@ -191,9 +189,8 @@ NODE_EXECUTION_FUNCTION(write_usd)
             for (const std::string& name :
                  mesh->get_vertex_parameterization_quantity_names()) {
                 auto values = mesh->get_vertex_parameterization_quantity(name);
-                std::string primvar_name =
+                const std::string primvar_name =
                     "polyscope:vertex:parameterization:" + name;
-                primvar_name = std::string(primvar_name.c_str());
                 auto primvar = primVarAPI.CreatePrimvar(
                     pxr::TfToken(primvar_name),
                     pxr::SdfValueTypeNames->TexCoord2fArray);
