@@ -8,8 +8,12 @@
 
 - [作业一](./assignment1/README.md)：最短路径计算 
 
+  [作业一分析](./assignment1/analysis.md)
+
   Deadline: 23:59, 2025-03-09
 
 - [作业二](./assignment2/README.md)：网格数据结构 
+
+  [作业二分析](./assignment2/analysis.md)
 
   Deadline: 23:59, 2025-03-19
