@@ -39,7 +39,6 @@
 #include "pxr/usd/usdShade/material.h"
 #include "stb_image.h"
 
-
 USTC_CG_NAMESPACE_OPEN_SCOPE
 
 // [0]: left Ctrl + left mouse button, [1]: left mouse button, [2]: middle mouse
@@ -670,7 +669,13 @@ void PolyscopeRenderer::UpdateStructures(DirtyPathSet paths)
         auto [name, type, index] = picked_info[i];
         if (polyscope::hasStructure(type, name)) {
             auto structure = polyscope::getStructure(type, name);
-            pick_result[i] = { structure, index };
+            if (structure->isEnabled()) {
+                structure->drawPick();
+                pick_result[i] = { structure, index };
+            }
+            else {
+                pick_result[i] = { nullptr, 0 };
+            }
         }
         else {
             pick_result[i] = { nullptr, 0 };
@@ -689,7 +694,13 @@ void PolyscopeRenderer::UpdateStructures(DirtyPathSet paths)
     auto [name, type, index] = polyscope_picked_info;
     if (polyscope::hasStructure(type, name)) {
         auto structure = polyscope::getStructure(type, name);
-        polyscope::pick::setSelection({ structure, index });
+        if (structure->isEnabled()) {
+            structure->drawPick();
+            polyscope::pick::setSelection({ structure, index });
+        }
+        else {
+            polyscope::pick::resetSelection();
+        }
     }
 }
 
