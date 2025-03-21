@@ -17,3 +17,9 @@
   [作业二分析](./assignment2/analysis.md)
 
   Deadline: 23:59, 2025-03-19
+
+- [作业三](./assignment3/README.md)：网格去噪 
+
+  [作业三分析](./assignment3/analysis.md)
+
+  Deadline: 23:59, 2025-03-29
