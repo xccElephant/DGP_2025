@@ -56,7 +56,7 @@ git pullall
 
 ### 4.测试网格降噪
 
-将`assignment/assignment2`目录下的`satge.usdc`文件放到`Assets`目录下，然后运行程序，可以看到`Stage Viewer`窗口中出现了`mesh_0`项，右击`mesh_0`项，选择`Edit`打开节点编辑器后，所有节点自动由下向上计算，将降噪后的网格显示在`Polyscope Renderer`窗口中。你可以调整`Mesh Smoothing`节点的参数，观察不同参数下的降噪效果。如下图所示，其中`Iterations=0`表示不进行迭代，即原始模型，`Iterations=30`表示迭代30次。
+将`assignment/assignment3`目录下的`satge.usdc`文件放到`Assets`目录下，然后运行程序，可以看到`Stage Viewer`窗口中出现了`mesh_0`项，右击`mesh_0`项，选择`Edit`打开节点编辑器后，所有节点自动由下向上计算，将降噪后的网格显示在`Polyscope Renderer`窗口中。你可以调整`Mesh Smoothing`节点的参数，观察不同参数下的降噪效果。如下图所示，其中`Iterations=0`表示不进行迭代，即原始模型，`Iterations=30`表示迭代30次。
 
 ![image](../../images/assignment_3_1.png)
 
