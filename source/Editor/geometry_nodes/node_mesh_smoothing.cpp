@@ -120,7 +120,8 @@ void update_filtered_normals_local_scheme(
     float sigma_c = getSigmaC(mesh, face_centroid, multiple_sigma_c);
 
     for (int iter = 0; iter < normal_iteration_number; iter++) {
-        // TODO: Calculate the filtered normals and fill in filtered_normals
+        // TODO: Use the **Local and Iterative Scheme** in the paper to
+        // calculate the filtered normals
     }
 }
 
