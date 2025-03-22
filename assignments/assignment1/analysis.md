@@ -11,7 +11,7 @@
 - 便于修改网格拓扑结构
 - 能够快速获取相邻元素
 
-![Half-edge](/images/analysis_1_1.png)
+![Half-edge](../../images/analysis_1_1.png)
 
 ### 2. OpenMesh中的半边结构实现
 
@@ -160,7 +160,7 @@ Dijkstra算法是一种解决带权有向图上单源最短路径问题的贪心
 - 而通过`u`到达`v`的路径长度为`dist[u] + length(u, v)`
 - 如果`dist[u] + length(u, v) < dist[v]`，则更新`dist[v]`为`dist[u] + length(u, v)`
 
-![Relaxation](/images/analysis_1_2.png)
+![Relaxation](../../images/analysis_1_2.png)
 
 
 ### 2. 算法步骤
