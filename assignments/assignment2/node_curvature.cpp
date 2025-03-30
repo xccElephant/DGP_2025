@@ -1,51 +1,16 @@
-# 作业二分析
+#include <corecrt_math_defines.h>
+#include <pxr/base/vt/array.h>
 
-## 离散曲面上的平均曲率
+#include <vector>
 
-在离散曲面上，平均曲率的计算通常基于离散Laplace-Beltrami算子。对于顶点 v_i，其Laplace-Beltrami算子可表示为：
+#include "GCore/Components/MeshOperand.h"
+#include "OpenMesh/Core/Geometry/Vector11T.hh"
+#include "OpenMesh/Core/Mesh/TriMesh_ArrayKernelT.hh"
+#include "geom_node_base.h"
+#include "nodes/core/def/node_def.hpp"
 
-$$
-\Delta \mathbf{x}(v_i) = \frac{1}{2A_i} \sum_{j \in \mathcal{N}(i)} (\cot(\alpha_{ij})+\cot(\beta_{ij})) (\mathbf{x}_j - \mathbf{x}_i)
-$$
+typedef OpenMesh::TriMesh_ArrayKernelT<> MyMesh;
 
-其中：
-- $A_i$ 是顶点 $v_i$ 周围的混合面积（通常为相邻三角形面积之和的1/3）
-- $\mathcal{N}(i)$ 表示与顶点 $v_i$ 相邻的顶点集合
-- $\alpha_{ij}$ 和 $\beta_{ij}$ 是边 $(i,j)$ 两侧的对角
-- $\mathbf{x}_j$ 和 $\mathbf{x}_i$ 是顶点的位置向量
-
-如图所示：
-
-![离散曲面上的平均曲率](../../images/analysis_2_1.png)
-
-平均曲率的定义为Laplace-Beltrami算子的模长的一半，符号由法向量决定：
-
-$$ 
-\left|H\right| = \frac{1}{2} \left|\Delta \mathbf{x}(v_i)\right|
-$$
-
-$$
-H = -\frac{1}{2} \Delta \mathbf{x}(v_i) \cdot \mathbf{n}_i = \frac{1}{2A_i} \sum_{j \in \mathcal{N}(i)} (\cot(\alpha_{ij})+\cot(\beta_{ij})) (\mathbf{x}_i - \mathbf{x}_j) \cdot \mathbf{n}_i
-$$
-
-其中 $\mathbf{n}_i$ 是顶点 $v_i$ 处的单位法向量。
-
-**代码实现**：
-
-首先，由于本次作业框架中，创建OpenMesh网格时没有请求法向量，导致无法计算平均曲率的符号，向同学们表示抱歉。
-
-为了计算符号，需要在`NODE_EXECUTION_FUNCTION(mean_curvature)`中请求法向量：
-
-```cpp
-// Request vertex and face normals
-omesh.request_vertex_normals();
-omesh.request_face_normals();
-omesh.update_normals();
-```
-
-然后就可以在`compute_mean_curvature`函数中正确计算平均曲率了：
-
-```cpp
 void compute_mean_curvature(
     const MyMesh& omesh,
     pxr::VtArray<float>& mean_curvature)
@@ -130,24 +95,7 @@ void compute_mean_curvature(
         mean_curvature[vertex_handle.idx()] = H;
     }
 }
-```
 
-![计算平均曲率时，求出各顶点坐标的方法](../../images/analysis_2_2.png)
-
-## 离散曲面上的高斯曲率
-
-$$
-K = \frac{1}{2A_i} (2\pi - \sum_{j \in \mathcal{N}(i)} \theta_{ij})
-$$
-
-其中：
-- $A_i$ 是顶点 $v_i$ 周围的混合面积（通常为相邻三角形面积之和的1/3）
-- $\mathcal{N}(i)$ 表示与顶点 $v_i$ 相邻的顶点集合
-- $\theta_{ij}$ 表示边 $(v_i,v_j)$ 与下一条边 $(v_i,v_{j+1})$ 之间的夹角
-
-代码实现：
-
-```cpp
 void compute_gaussian_curvature(
     const MyMesh& omesh,
     pxr::VtArray<float>& gaussian_curvature)
@@ -212,18 +160,114 @@ void compute_gaussian_curvature(
             angle_defect / area;  // 高斯曲率 = 角度差 / 面积
     }
 }
-```
 
-## 直方图均衡化
+NODE_DEF_OPEN_SCOPE
 
-如果直接用上文计算出来的平均曲率和高斯曲率进行可视化，会导致图像对比度非常低，很难看出差异，如图所示
+NODE_DECLARATION_FUNCTION(mean_curvature)
+{
+    b.add_input<Geometry>("Mesh");
+    b.add_output<pxr::VtArray<float>>("Mean Curvature");
+}
 
-![直方图均衡化前](../../images/analysis_2_3.png)
+NODE_EXECUTION_FUNCTION(mean_curvature)
+{
+    auto geometry = params.get_input<Geometry>("Mesh");
+    auto mesh = geometry.get_component<MeshComponent>();
+    auto vertices = mesh->get_vertices();
+    auto face_vertex_indices = mesh->get_face_vertex_indices();
+    auto face_vertex_counts = mesh->get_face_vertex_counts();
 
-直方图均衡化的目的是将图像的直方图分布均匀化，使得图像的对比度更高。其基本思想是通过累积分布函数（CDF）来重新映射像素值，从而使得每个像素值在输出图像中出现的概率大致相等，如图所示（图片来源网络）：
+    // Convert the mesh to OpenMesh
+    MyMesh omesh;
 
-![（网图）直方图均衡化](../../images/analysis_2_4.jpg)
+    // Add vertices
+    std::vector<OpenMesh::VertexHandle> vhandles;
+    vhandles.reserve(vertices.size());
 
-![直方图均衡化后](../../images/analysis_2_5.png)
+    for (auto vertex : vertices) {
+        omesh.add_vertex(OpenMesh::Vec3f(vertex[0], vertex[1], vertex[2]));
+    }
 
-直方图均衡化节点目前也已经加入框架内，其名字为`histogram_equalization`，它在不影响原数据范围的情况下进行均衡化。
+    // Add faces
+    size_t start = 0;
+    for (int face_vertex_count : face_vertex_counts) {
+        std::vector<OpenMesh::VertexHandle> face;
+        face.reserve(face_vertex_count);
+        for (int j = 0; j < face_vertex_count; j++) {
+            face.push_back(
+                OpenMesh::VertexHandle(face_vertex_indices[start + j]));
+        }
+        omesh.add_face(face);
+        start += face_vertex_count;
+    }
+
+    // Request vertex and face normals
+    omesh.request_vertex_normals();
+    omesh.request_face_normals();
+    omesh.update_normals();
+
+    // Compute mean curvature
+    pxr::VtArray<float> mean_curvature;
+    mean_curvature.reserve(omesh.n_vertices());
+
+    compute_mean_curvature(omesh, mean_curvature);
+
+    params.set_output("Mean Curvature", mean_curvature);
+
+    return true;
+}
+
+NODE_DECLARATION_UI(mean_curvature);
+
+NODE_DECLARATION_FUNCTION(gaussian_curvature)
+{
+    b.add_input<Geometry>("Mesh");
+    b.add_output<pxr::VtArray<float>>("Gaussian Curvature");
+}
+
+NODE_EXECUTION_FUNCTION(gaussian_curvature)
+{
+    auto geometry = params.get_input<Geometry>("Mesh");
+    auto mesh = geometry.get_component<MeshComponent>();
+    auto vertices = mesh->get_vertices();
+    auto face_vertex_indices = mesh->get_face_vertex_indices();
+    auto face_vertex_counts = mesh->get_face_vertex_counts();
+
+    // Convert the mesh to OpenMesh
+    MyMesh omesh;
+
+    // Add vertices
+    std::vector<OpenMesh::VertexHandle> vhandles;
+    vhandles.reserve(vertices.size());
+
+    for (auto vertex : vertices) {
+        omesh.add_vertex(OpenMesh::Vec3f(vertex[0], vertex[1], vertex[2]));
+    }
+
+    // Add faces
+    size_t start = 0;
+    for (int face_vertex_count : face_vertex_counts) {
+        std::vector<OpenMesh::VertexHandle> face;
+        face.reserve(face_vertex_count);
+        for (int j = 0; j < face_vertex_count; j++) {
+            face.push_back(
+                OpenMesh::VertexHandle(face_vertex_indices[start + j]));
+        }
+        omesh.add_face(face);
+        start += face_vertex_count;
+    }
+
+    // Compute Gaussian curvature
+    pxr::VtArray<float> gaussian_curvature;
+    gaussian_curvature.reserve(omesh.n_vertices());
+
+    compute_gaussian_curvature(omesh, gaussian_curvature);
+
+    params.set_output("Gaussian Curvature", gaussian_curvature);
+
+    return true;
+}
+
+NODE_DECLARATION_UI(gaussian_curvature);
+
+NODE_DEF_CLOSE_SCOPE
