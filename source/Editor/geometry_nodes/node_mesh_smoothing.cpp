@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <set>
 
 #include "GCore/Components/MeshOperand.h"
 #include "GCore/GOP.h"
@@ -16,13 +17,46 @@ typedef enum { kEdgeBased, kVertexBased } FaceNeighborType;
 void getFaceArea(MyMesh &mesh, std::vector<float> &area)
 {
     area.resize(mesh.n_faces());
-    // TODO: Fill in the area vector with the area of each face
+    
+    // Calculate area for each face
+    for (MyMesh::FaceIter f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it) {
+        MyMesh::FaceVertexIter fv_it = mesh.fv_iter(*f_it);
+        
+        // Get the three vertices of the triangle
+        MyMesh::Point v0 = mesh.point(*fv_it);
+        ++fv_it;
+        MyMesh::Point v1 = mesh.point(*fv_it);
+        ++fv_it;
+        MyMesh::Point v2 = mesh.point(*fv_it);
+        
+        // Calculate two edges
+        MyMesh::Point edge1 = v1 - v0;
+        MyMesh::Point edge2 = v2 - v0;
+        
+        // Calculate cross product and get area
+        MyMesh::Point cross = edge1 % edge2;
+        area[f_it->idx()] = 0.5f * cross.length();
+    }
 }
 
 void getFaceCentroid(MyMesh &mesh, std::vector<MyMesh::Point> &centroid)
 {
     centroid.resize(mesh.n_faces(), MyMesh::Point(0.0, 0.0, 0.0));
-    // TODO: Fill in the centroid vector with the centroid of each face
+    
+    // Calculate centroid for each face
+    for (MyMesh::FaceIter f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it) {
+        MyMesh::Point sum(0.0, 0.0, 0.0);
+        int count = 0;
+        
+        // Sum all vertices of the face
+        for (MyMesh::FaceVertexIter fv_it = mesh.fv_iter(*f_it); fv_it.is_valid(); ++fv_it) {
+            sum += mesh.point(*fv_it);
+            count++;
+        }
+        
+        // Divide by the number of vertices to get centroid
+        centroid[f_it->idx()] = sum / count;
+    }
 }
 
 void getFaceNormal(MyMesh &mesh, std::vector<MyMesh::Normal> &normals)
@@ -31,18 +65,45 @@ void getFaceNormal(MyMesh &mesh, std::vector<MyMesh::Normal> &normals)
     mesh.update_face_normals();
 
     normals.resize(mesh.n_faces());
-    // TODO: Fill in the normals vector with the normal of each face
+    
+    // Get the normal for each face
+    for (MyMesh::FaceIter f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it) {
+        normals[f_it->idx()] = mesh.normal(*f_it);
+    }
 }
 
 void getFaceNeighbor(
     MyMesh &mesh,
     MyMesh::FaceHandle fh,
-    std::vector<MyMesh::FaceHandle> &face_neighbor)
+    std::vector<MyMesh::FaceHandle> &face_neighbor,
+    FaceNeighborType neighbor_type = kEdgeBased)
 {
     face_neighbor.clear();
-    // TODO: Fill in the face_neighbor vector with the neighboring faces of fh
-    // Hint: There are two ways to get the neighboring faces: edge-based and
-    // vertex-based, which will lead to different results
+    
+    if (neighbor_type == kEdgeBased) {
+        // Get face neighbors that share an edge with the current face
+        for (MyMesh::FaceFaceIter ff_it = mesh.ff_iter(fh); ff_it.is_valid(); ++ff_it) {
+            face_neighbor.push_back(*ff_it);
+        }
+    } else {
+        // Get face neighbors that share at least one vertex with the current face
+        std::set<MyMesh::FaceHandle> unique_neighbors;
+        
+        // Iterate through vertices of the face
+        for (MyMesh::FaceVertexIter fv_it = mesh.fv_iter(fh); fv_it.is_valid(); ++fv_it) {
+            // Iterate through faces adjacent to each vertex
+            for (MyMesh::VertexFaceIter vf_it = mesh.vf_iter(*fv_it); vf_it.is_valid(); ++vf_it) {
+                if (*vf_it != fh) {  // Don't include the face itself
+                    unique_neighbors.insert(*vf_it);
+                }
+            }
+        }
+        
+        // Convert set to vector
+        for (const auto& neighbor : unique_neighbors) {
+            face_neighbor.push_back(neighbor);
+        }
+    }
 }
 
 void getAllFaceNeighbor(
@@ -51,7 +112,19 @@ void getAllFaceNeighbor(
     bool include_central_face)
 {
     all_face_neighbor.resize(mesh.n_faces());
-    // TODO: Fill in all_face_neighbor with the neighboring faces of each face
+    
+    // Get neighbors for each face
+    for (MyMesh::FaceIter f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it) {
+        std::vector<MyMesh::FaceHandle> neighbors;
+        getFaceNeighbor(mesh, *f_it, neighbors);
+        
+        // Include the central face itself if requested
+        if (include_central_face) {
+            neighbors.push_back(*f_it);
+        }
+        
+        all_face_neighbor[f_it->idx()] = neighbors;
+    }
 }
 
 void updateVertexPosition(
@@ -61,19 +134,49 @@ void updateVertexPosition(
     bool fixed_boundary)
 {
     std::vector<MyMesh::Point> new_points(mesh.n_vertices());
-
     std::vector<MyMesh::Point> centroid;
 
     for (int iter = 0; iter < iteration_number; iter++) {
         getFaceCentroid(mesh, centroid);
-        // TODO: Calculate the new vertex positions and fill in new_points
-        // Hint: You can use the filtered normals and centroids to update the
-        // vertex positions
-
-        for (MyMesh::VertexIter v_it = mesh.vertices_begin();
-             v_it != mesh.vertices_end();
-             v_it++)
+        
+        // Initialize new vertex positions with current positions
+        for (MyMesh::VertexIter v_it = mesh.vertices_begin(); v_it != mesh.vertices_end(); ++v_it) {
+            new_points[v_it->idx()] = mesh.point(*v_it);
+        }
+        
+        // Update non-boundary vertices
+        for (MyMesh::VertexIter v_it = mesh.vertices_begin(); v_it != mesh.vertices_end(); ++v_it) {
+            // Skip boundary vertices if they should be fixed
+            if (fixed_boundary && mesh.is_boundary(*v_it)) {
+                continue;
+            }
+            
+            // Calculate the new vertex position
+            MyMesh::Point new_pos(0, 0, 0);
+            float total_weight = 0.0f;
+            
+            // Iterate through adjacent faces
+            for (MyMesh::VertexFaceIter vf_it = mesh.vf_iter(*v_it); vf_it.is_valid(); ++vf_it) {
+                // Project the vertex onto the filtered normal plane passing through the face centroid
+                MyMesh::Normal n = filtered_normals[vf_it->idx()];
+                MyMesh::Point c = centroid[vf_it->idx()];
+                
+                float dist = (mesh.point(*v_it) - c) | n;  // Dot product for projection distance
+                MyMesh::Point projected = mesh.point(*v_it) - n * dist;
+                
+                new_pos += projected;
+                total_weight += 1.0f;
+            }
+            
+            if (total_weight > 0) {
+                new_points[v_it->idx()] = new_pos / total_weight;
+            }
+        }
+        
+        // Apply the new vertex positions
+        for (MyMesh::VertexIter v_it = mesh.vertices_begin(); v_it != mesh.vertices_end(); ++v_it) {
             mesh.set_point(*v_it, new_points[v_it->idx()]);
+        }
     }
 }
 
@@ -85,10 +188,10 @@ float getSigmaC(
     float sigma_c = 0.0;
     float num = 0.0;
     for (MyMesh::FaceIter f_it = mesh.faces_begin(); f_it != mesh.faces_end();
-         f_it++) {
+        f_it++) {
         MyMesh::Point ci = face_centroid[f_it->idx()];
         for (MyMesh::FaceFaceIter ff_it = mesh.ff_iter(*f_it); ff_it.is_valid();
-             ff_it++) {
+            ff_it++) {
             MyMesh::Point cj = face_centroid[ff_it->idx()];
             sigma_c += (ci - cj).length();
             num++;
@@ -119,9 +222,54 @@ void update_filtered_normals_local_scheme(
 
     float sigma_c = getSigmaC(mesh, face_centroid, multiple_sigma_c);
 
+    // Copy initial normals to filtered normals
+    for (size_t i = 0; i < previous_normals.size(); i++) {
+        filtered_normals[i] = previous_normals[i];
+    }
+
+    // Local and iterative scheme for filtering normals
     for (int iter = 0; iter < normal_iteration_number; iter++) {
-        // TODO: Use the **Local and Iterative Scheme** in the paper to
-        // calculate the filtered normals
+        // Iterate over all faces
+        for (MyMesh::FaceIter f_it = mesh.faces_begin(); f_it != mesh.faces_end(); ++f_it) {
+            MyMesh::FaceHandle fh = *f_it;
+            int i = fh.idx();
+            
+            MyMesh::Normal weighted_normal(0, 0, 0);
+            float total_weight = 0.0f;
+            
+            // Iterate over neighboring faces
+            for (const auto& nfh : all_face_neighbor[i]) {
+                int j = nfh.idx();
+                
+                // Calculate bilateral weights
+                
+                // Spatial weight (centroid distance)
+                float distance = (face_centroid[i] - face_centroid[j]).length();
+                float wc = exp(-distance*distance / (2.0f * sigma_c * sigma_c));
+                
+                // Signal weight (normal difference)
+                float normal_difference = (1.0f - (filtered_normals[i] | filtered_normals[j]));
+                float ws = exp(-normal_difference*normal_difference / (2.0f * sigma_s * sigma_s));
+                
+                // Combined weight
+                float weight = wc * ws * face_area[j];
+                
+                // Add weighted normal
+                weighted_normal += filtered_normals[j] * weight;
+                total_weight += weight;
+            }
+            
+            // Normalize the weighted normal
+            if (total_weight > 0) {
+                weighted_normal.normalize();
+                previous_normals[i] = weighted_normal;
+            }
+        }
+        
+        // Update filtered normals for the next iteration
+        for (size_t i = 0; i < filtered_normals.size(); i++) {
+            filtered_normals[i] = previous_normals[i];
+        }
     }
 }
 
