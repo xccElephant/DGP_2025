@@ -114,11 +114,11 @@ void update_filtered_normals_local_scheme(MyMesh &mesh, std::vector<MyMesh::Norm
   float weight = face_area[index_j] * spatial_weight * range_weight;  // 总权重 = 面积 × 空间权重 × 值域权重
   ```
 
-    ![空间域权重](images/analysis_3_1.png)
+    ![空间域权重](../../images/analysis_3_1.png)
 
-    ![值域权重](images/analysis_3_2.png)
+    ![值域权重](../../images/analysis_3_2.png)
 
-    ![新法线](images/analysis_3_3.png)
+    ![新法线](../../images/analysis_3_3.png)
   
   - 关键计算包括：
     - **面积权重**：面积越大的面贡献越大
