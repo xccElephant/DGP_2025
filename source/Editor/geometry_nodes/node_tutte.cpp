@@ -47,6 +47,103 @@ void tutte_embedding(MyMesh& omesh)
      **
      */
 
+    // Step 1: Identify boundary and interior vertices
+    std::vector<bool> is_boundary(omesh.n_vertices(), false);
+    std::vector<int> interior_indices;
+    std::vector<int> boundary_indices;
+
+    for (auto v_it = omesh.vertices_begin(); v_it != omesh.vertices_end(); ++v_it) {
+        if (omesh.is_boundary(*v_it)) {
+            is_boundary[v_it->idx()] = true;
+            boundary_indices.push_back(v_it->idx());
+        } else {
+            interior_indices.push_back(v_it->idx());
+        }
+    }
+
+    int num_interior = interior_indices.size();
+    int num_boundary = boundary_indices.size();
+    int num_vertices = omesh.n_vertices();
+
+    // Create a mapping from vertex indices to matrix indices for interior vertices
+    std::map<int, int> index_map;
+    for (int i = 0; i < num_interior; ++i) {
+        index_map[interior_indices[i]] = i;
+    }
+
+    // Step 2: Construct the Laplacian matrix (using uniform weights)
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> triplets;
+    
+    // Step 3: Set up the right-hand sides for x, y, and z coordinates
+    Eigen::VectorXd b_x = Eigen::VectorXd::Zero(num_interior);
+    Eigen::VectorXd b_y = Eigen::VectorXd::Zero(num_interior);
+    Eigen::VectorXd b_z = Eigen::VectorXd::Zero(num_interior);
+
+    // For each interior vertex, construct the Laplacian row
+    for (int i = 0; i < num_interior; ++i) {
+        int v_idx = interior_indices[i];
+        auto v_handle = omesh.vertex_handle(v_idx);
+        
+        // Count the neighbors of the vertex
+        int valence = 0;
+        for (auto vv_it = omesh.vv_iter(v_handle); vv_it.is_valid(); ++vv_it) {
+            valence++;
+        }
+        
+        // Set diagonal element to valence (number of neighbors)
+        triplets.push_back(T(i, i, valence));
+        
+        // Process each neighbor
+        for (auto vv_it = omesh.vv_iter(v_handle); vv_it.is_valid(); ++vv_it) {
+            int neighbor_idx = vv_it->idx();
+            
+            // Set -1 for each neighbor
+            if (!is_boundary[neighbor_idx]) {
+                // Interior neighbor contributes to the Laplacian matrix
+                int j = index_map[neighbor_idx];
+                triplets.push_back(T(i, j, -1.0));
+            } else {
+                // Boundary neighbor contributes to the right-hand side
+                OpenMesh::Vec3f p = omesh.point(*vv_it);
+                b_x(i) += p[0];
+                b_y(i) += p[1];
+                b_z(i) += p[2];
+            }
+        }
+    }
+
+    // Create sparse matrix
+    Eigen::SparseMatrix<double> L(num_interior, num_interior);
+    L.setFromTriplets(triplets.begin(), triplets.end());
+
+    // Solve the system for each coordinate
+    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
+    solver.compute(L);
+    
+    if (solver.info() != Eigen::Success) {
+        // Handle error
+        std::cerr << "Decomposition failed!" << std::endl;
+        return;
+    }
+
+    Eigen::VectorXd x = solver.solve(b_x);
+    Eigen::VectorXd y = solver.solve(b_y);
+    Eigen::VectorXd z = solver.solve(b_z);
+
+    if (solver.info() != Eigen::Success) {
+        // Handle error
+        std::cerr << "Solving failed!" << std::endl;
+        return;
+    }
+
+    // Step 4: Update the mesh with new vertex positions
+    for (int i = 0; i < num_interior; ++i) {
+        int v_idx = interior_indices[i];
+        auto v_handle = omesh.vertex_handle(v_idx);
+        omesh.set_point(v_handle, OpenMesh::Vec3f(x(i), y(i), z(i)));
+    }
+
     return;
 }
 
