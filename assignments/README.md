@@ -37,3 +37,9 @@
   [作业五分析](./assignment5/analysis.md)
 
   Deadline: 23:59, 2025-04-19
+
+- [作业六](./assignment6/README.md)：ARAP变形 
+
+  [作业六分析](./assignment6/analysis.md)
+
+  Deadline: 23:59, 2025-04-29

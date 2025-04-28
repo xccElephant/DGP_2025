@@ -2,7 +2,11 @@
 #include <string>
 
 #include "nodes/core/def/node_def.hpp"
+#include "polyscope/curve_network.h"
+#include "polyscope/point_cloud.h"
 #include "polyscope/polyscope.h"
+#include "polyscope/structure.h"
+#include "polyscope/surface_mesh.h"
 #include "polyscope_widget/polyscope_renderer.h"
 
 NODE_DEF_OPEN_SCOPE
@@ -10,6 +14,7 @@ NODE_DECLARATION_FUNCTION(get_control_points)
 {
     b.add_input<std::string>("Strcture Name");
     b.add_output<std::vector<size_t>>("Control Points Indices");
+    b.add_output<std::vector<std::array<float, 3>>>("Control Points Positions");
 }
 
 NODE_EXECUTION_FUNCTION(get_control_points)
@@ -39,6 +44,37 @@ NODE_EXECUTION_FUNCTION(get_control_points)
     }
     std::cout << std::endl;
     params.set_output("Control Points Indices", control_points);
+
+    std::vector<std::array<float, 3>> control_points_positions;
+    polyscope::Structure* structure;
+    if (is_surface_mesh) {
+        structure = polyscope::getStructure("Surface Mesh", structure_name);
+        auto surface_mesh = static_cast<polyscope::SurfaceMesh*>(structure);
+        for (auto index : control_points) {
+            auto vertex = surface_mesh->vertexPositions.getValue(index);
+            control_points_positions.push_back(
+                { vertex[0], vertex[1], vertex[2] });
+        }
+    }
+    else if (is_curve_network) {
+        structure = polyscope::getStructure("Curve Network", structure_name);
+        auto curve_network = static_cast<polyscope::CurveNetwork*>(structure);
+        for (auto index : control_points) {
+            auto vertex = curve_network->nodePositions.getValue(index);
+            control_points_positions.push_back(
+                { vertex[0], vertex[1], vertex[2] });
+        }
+    }
+    else if (is_point_cloud) {
+        structure = polyscope::getStructure("Point Cloud", structure_name);
+        auto point_cloud = static_cast<polyscope::PointCloud*>(structure);
+        for (auto index : control_points) {
+            auto vertex = point_cloud->getPointPosition(index);
+            control_points_positions.push_back(
+                { vertex[0], vertex[1], vertex[2] });
+        }
+    }
+    params.set_output("Control Points Positions", control_points_positions);
 
     return true;
 }
