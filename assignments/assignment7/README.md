@@ -86,4 +86,4 @@ $$
 
 ## 实验提交
 
-将`node_arap_deformation.cpp`打包为 `zip` 文件，并将其命名为 `学号_姓名_hw6.zip`，通过邮件发送至 `hwc20040629@mail.ustc.edu.cn`，在邮件主题中注明课程名称、作业序号和学号、姓名。
+将`node_mvc.cpp`打包为 `zip` 文件，并将其命名为 `学号_姓名_hw7.zip`，通过邮件发送至 `hwc20040629@mail.ustc.edu.cn`，在邮件主题中注明课程名称、作业序号和学号、姓名。
