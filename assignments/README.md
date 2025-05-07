@@ -43,3 +43,9 @@
   [作业六分析](./assignment6/analysis.md)
 
   Deadline: 23:59, 2025-04-29
+
+- [作业七](./assignment7/README.md)：平均值坐标计算 
+
+  [作业七分析](./assignment7/analysis.md)
+
+  Deadline: 23:59, 2025-05-14
