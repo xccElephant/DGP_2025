@@ -64,7 +64,7 @@ git pullall
 
 ### 3. 实现平均值坐标的计算
 
-你需要根据论文的内容，以及代码中的注释（其中包含ARAP Deformation算法介绍），完成`source/Editor/geometry_nodes/node_mvc.cpp`中包含`TODO`的部分（补全第69行的lambda表达式，删去原来的占位代码）。
+你需要根据论文的内容，以及代码中的注释（其中包含MVC算法介绍），完成`source/Editor/geometry_nodes/node_mvc.cpp`中包含`TODO`的部分（补全第69行的lambda表达式，删去原来的占位代码）。
 
 ![image](../../images/assignment_7_2.png)
 
