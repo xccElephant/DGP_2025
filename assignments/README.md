@@ -49,3 +49,9 @@
   [作业七分析](./assignment7/analysis.md)
 
   Deadline: 23:59, 2025-05-14
+
+- [作业八](./assignment8/README.md)：QEM网格简化
+
+  [作业八分析](./assignment8/analysis.md)
+
+  Deadline: 23:59, 2025-05-24
