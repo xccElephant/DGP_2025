@@ -55,3 +55,9 @@
   [作业八分析](./assignment8/analysis.md)
 
   Deadline: 23:59, 2025-05-24
+
+- [作业九](./assignment9/README.md)：重新网格化
+
+  [作业九分析](./assignment9/analysis.md)
+
+  Deadline: 23:59, 2025-06-09
