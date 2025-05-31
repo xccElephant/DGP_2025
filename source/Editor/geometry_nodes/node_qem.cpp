@@ -96,21 +96,31 @@ NODE_EXECUTION_FUNCTION(qem)
         return false;
     }
 
-    /* ----------------------------- Preprocess -------------------------------
+    /* ----------------------------- Preprocess
+     *-------------------------------
      ** Create a halfedge structure (using OpenMesh) for the input mesh. The
-     ** half-edge data structure is a widely used data structure in geometric
-     ** processing, offering convenient operations for traversing and modifying
+     ** half-edge data structure is a widely used data structure in
+     *geometric
+     ** processing, offering convenient operations for traversing and
+     *modifying
      ** mesh elements.
      */
 
     // Initialization
     auto halfedge_mesh = operand_to_openmesh(&input_mesh);
 
+    halfedge_mesh->request_vertex_status();
+    halfedge_mesh->request_edge_status();
+    halfedge_mesh->request_face_status();
+    halfedge_mesh->request_halfedge_status();
+
     // QEM simplification
     qem(halfedge_mesh, simplification_ratio, distance_threshold);
 
     // Convert the simplified mesh back to the operand
     auto geometry = openmesh_to_operand(halfedge_mesh.get());
+
+    auto mesh = geometry->get_component<MeshComponent>();
 
     // Set the output of the nodes
     params.set_output("Output", std::move(*geometry));
