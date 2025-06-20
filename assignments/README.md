@@ -61,3 +61,9 @@
   [作业九分析](./assignment9/analysis.md)
 
   Deadline: 23:59, 2025-06-09
+
+- [作业十](./assignment10/README.md)：4-Rosy场（Cross Field）
+
+  [作业十分析](./assignment10/analysis.md)
+
+  Deadline: 23:59, 2025-06-22
